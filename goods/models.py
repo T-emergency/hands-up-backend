@@ -6,13 +6,11 @@ from chat.models import TradeChatRoom, AuctionChatRoom
 
 class Goods(models.Model):
     class Meta:
-        db_table = 'Goods'
-        ordering = ['-created_at']  # 일단 추가해뒀습니다
+        db_table = "Goods"
+        ordering = ["-created_at"]  # 일단 추가해뒀습니다
 
-    seller = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='sell_goods')
-    buyer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='buy_goods')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sell_goods")
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buy_goods", null=True)
     trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE)
 
@@ -27,17 +25,17 @@ class Goods(models.Model):
     start_time = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    like = models.ManyToManyField(User, related_name='like_goods', blank=True)
+    like = models.ManyToManyField(User, related_name="like_goods", blank=True)
 
 
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='goods/')
+    image = models.ImageField(upload_to="goods/")
 
 
 class BidPrice(models.Model):
     class Meta:
-        db_table = 'BidPrice'
+        db_table = "BidPrice"
         # ordering = ['-created_at']  # 일단 추가해뒀습니다
 
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
