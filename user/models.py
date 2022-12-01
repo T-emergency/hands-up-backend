@@ -40,6 +40,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    class Meta:
+        db_table = 'user'
     phone = models.CharField(
         verbose_name = 'phone',
         max_length = 15,
@@ -64,7 +66,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['username','phone']
+    REQUIRED_FIELDS = ['phone',]
 
     def __str__(self):
         return self.username
