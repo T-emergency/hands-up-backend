@@ -2,7 +2,7 @@ from django.db import models
 from user.models import User
 
 
-
+#자유게시판
 class FreeArticle(models.Model):
 
     title = models.CharField('제목', null=True, max_length=20)
@@ -20,7 +20,7 @@ class FreeArticle(models.Model):
         return str(self.title)
 
 
-
+#제보게시판
 class ReportArticle(models.Model):
 
     title = models.CharField('제목', null=True, max_length=20)
@@ -38,7 +38,7 @@ class ReportArticle(models.Model):
         return str(self.title)
 
 
-
+#자유게시판 댓글
 class FreeArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
@@ -56,7 +56,7 @@ class FreeArticleComment(models.Model):
         ordering = ['-created_at']
 
 
-
+#제보게시판 댓글
 class ReportArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
