@@ -32,6 +32,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels', # 충돌 우려로 상단에 배치
+    'daphne',
+    'chat',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,7 +49,6 @@ INSTALLED_APPS = [
     
     'board',
     'goods',
-    'chat',
 
     # django
     'rest_framework',
@@ -56,6 +59,19 @@ INSTALLED_APPS = [
 
     
 ]
+WSGI_APPLICATION = 'handsup.wsgi.application'
+# Channels
+ASGI_APPLICATION = 'handsup.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -87,7 +103,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'handsup.wsgi.application'
 
 
 REST_FRAMEWORK = {
