@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     # service app
     'user',
     'review',
-    
+    'chat',
     'board',
-    'auction',
+    'goods',
     # 'goods',
 
     # django
