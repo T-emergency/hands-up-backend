@@ -4,7 +4,6 @@ from django.contrib.auth.models import (
 )
 
 
-
 class UserManager(BaseUserManager):
     def create_user(self, phone, username, password=None):
         """
@@ -17,8 +16,8 @@ class UserManager(BaseUserManager):
             raise ValueError('Users must have an username')
 
         user = self.model(
-            phone = phone,
-            username = username
+            phone=phone,
+            username=username
         )
 
         user.set_password(password)
@@ -40,31 +39,32 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    class Meta:
+        db_table = 'user'
     phone = models.CharField(
-        verbose_name = 'phone',
-        max_length = 15,
-        unique = True,
+        verbose_name='phone',
+        max_length=15,
+        unique=True,
     )
     username = models.CharField(
-        verbose_name = 'username',
-        max_length = 128,
-        unique = True,
+        verbose_name='username',
+        max_length=128,
+        unique=True,
     )
 
-
-    profile_image = models.ImageField(upload_to='media', height_field=None, width_field=None, default='default.jpeg', blank=True)
+    profile_image = models.ImageField(
+        upload_to='media', height_field=None, width_field=None, default='default.jpeg', blank=True)
     kakao_id = models.CharField(max_length=100, blank=True)
 
     rating_score = models.SmallIntegerField()
     is_active = models.BooleanField(default=True)
-
 
     is_admin = models.BooleanField(default=False)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['username','phone']
+    REQUIRED_FIELDS = ['phone', ]
 
     def __str__(self):
         return self.username
