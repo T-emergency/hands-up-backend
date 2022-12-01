@@ -33,3 +33,4 @@ class AuctionMessage(models.Model):
     author = models.ForeignKey(User, on_delete = models.CASCADE)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete = models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)

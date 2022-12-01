@@ -44,8 +44,8 @@ INSTALLED_APPS = [
     'review',
     
     'board',
-    'auction',
-    # 'goods',
+    'goods',
+    'chat',
 
     # django
     'rest_framework',
