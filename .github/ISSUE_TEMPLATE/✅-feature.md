@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-### Description
+### Description ( 기능 설명 )
 
 
 ### Todo
