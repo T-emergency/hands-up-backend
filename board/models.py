@@ -41,9 +41,8 @@ class ReportArticle(models.Model):
 class FreeArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
-<<<<<<< HEAD
-    create_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    update_at = models.DateTimeField('수정 시간', auto_now=True)
+    created_at = models.DateTimeField('생성 시간', auto_now_add=True)
+    updated_at = models.DateTimeField('수정 시간', auto_now=True)
     author = models.ForeignKey(
         User, verbose_name='작성자', on_delete=models.CASCADE)
 
@@ -52,20 +51,6 @@ class FreeArticleComment(models.Model):
 
     def __str__(self):
         return str(self.content)
-=======
-    created_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    updated_at = models.DateTimeField('수정 시간', auto_now=True)
-    author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
-
-    article = models.ForeignKey(FreeArticle, verbose_name='제품게시글',on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return str(self.content)
-    
-    class Meta:
-        db_table = 'FreeArticleComment'
-        ordering = ['-created_at']
->>>>>>> refs/remotes/origin/main
 
     class Meta:
         db_table = 'FreeArticleComment'
@@ -75,29 +60,17 @@ class FreeArticleComment(models.Model):
 class ReportArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
-<<<<<<< HEAD
-    create_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    update_at = models.DateTimeField('수정 시간', auto_now=True)
+    created_at = models.DateTimeField('생성 시간', auto_now_add=True)
+    updated_at = models.DateTimeField('수정 시간', auto_now=True)
     author = models.ForeignKey(
         User, verbose_name='작성자', on_delete=models.CASCADE)
 
     article = models.ForeignKey(
         ReportArticle, verbose_name='제품게시글', on_delete=models.CASCADE, null=True)
-=======
-    created_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    updated_at = models.DateTimeField('수정 시간', auto_now=True)
-    author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
-
-    article = models.ForeignKey(ReportArticle, verbose_name='제품게시글',on_delete=models.CASCADE, null=True)
->>>>>>> refs/remotes/origin/main
 
     def __str__(self):
         return str(self.content)
 
     class Meta:
         db_table = 'ReportArticleComment'
-<<<<<<< HEAD
         ordering = ['-created_at']
-=======
-        ordering = ['-created_at']
->>>>>>> refs/remotes/origin/main

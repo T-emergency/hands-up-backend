@@ -40,7 +40,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     class Meta:
-        db_table = 'user'
+        db_table = 'User'
     phone = models.CharField(
         verbose_name='phone',
         max_length=15,
