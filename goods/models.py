@@ -11,7 +11,7 @@ class Goods(models.Model):
         ordering = ['-created_at'] # 일단 추가해뒀습니다
 
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sell_goods')
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buy_goods')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buy_goods', null=True)
     trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE)
 
