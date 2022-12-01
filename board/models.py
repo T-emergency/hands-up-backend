@@ -43,7 +43,7 @@ class FreeArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    update_at = models.DateTimeField('수정 시간', auto_now=True)
+    updated_at = models.DateTimeField('수정 시간', auto_now=True)
     author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
 
     article = models.ForeignKey(FreeArticle, verbose_name='제품게시글',on_delete=models.CASCADE, null=True)
@@ -61,7 +61,7 @@ class ReportArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    update_at = models.DateTimeField('수정 시간', auto_now=True)
+    updated_at = models.DateTimeField('수정 시간', auto_now=True)
     author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
 
     article = models.ForeignKey(ReportArticle, verbose_name='제품게시글',on_delete=models.CASCADE, null=True)
