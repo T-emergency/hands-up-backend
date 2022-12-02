@@ -1,7 +1,7 @@
 ---
 name: "\U0001F41B Bug"
 about: 버그 내용을 입력해 주세요.
-title: ''
+title: "\U0001F41B [Bug]"
 labels: ''
 assignees: ''
 
