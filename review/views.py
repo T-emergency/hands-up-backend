@@ -13,8 +13,15 @@ class ReviewAPIView(APIView):
     """
     리뷰를 남기면서 상대방의 매너를 평가하는 기능
     """
+    # TODO post하면 바로 점수반영
+    # 중복금지
+    # 1주일에 한번씩 평가 낮은사람 정지, 메일
+    # 평가 낮지만 위험은 경고메일
+    # 리뷰평가를 한번에 계산해서 넘겨준다 = 당근
+    # 한번 남기면 남기지 못하게
+    # 한사람이 한번만 평가가능
+    # 조건걸어서 판매자면 구매자 점수내리는 로직 리퀘스트데이터 사용가능?
 
-    # TODO 우선 구매자만
     # 테이블 나눠서 바이어 셀러 or 신고자 피신고자 하면 좋을 거 같긴한데 안나누려면 이름 포스트 저장해두고
     # 바이어가 유저로 바뀌고 굿즈에서 구매자 판매자 가져와서 유저가
     # 굿즈에 들어가서 
@@ -30,10 +37,35 @@ class ReviewAPIView(APIView):
         print(request.user)
         print(goods_id)
         goods_obj=Goods.objects.get(id=goods_id)
+        
+        # score=request.data.get('manner_score')
         serializer = ReviewCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user = request.user, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            print("시리얼",serializer.data)
+            score=serializer.data.get('manner_score')
+            print(score)
+            print("바이어id",goods_obj.buyer_id)
+            print("셀러id",goods_obj.seller_id)
+            print("유저 id",request.user.id)
+            # evaluated_user_obj = get_object_or_404(User, id=buyer_id)
+            # print("매너점수",evaluated_user_obj.rating_score)
+            # print("매너점수",goods_obj.rating_score)
+            
+            if request.user.id==goods_obj.seller_id:
+                buyer_id=goods_obj.buyer_id
+                user = get_object_or_404(User, id=buyer_id)
+                user.rating_score = user.rating_score + score
+                user.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            elif request.user.id==goods_obj.buyer_id:
+                seller_id=goods_obj.seller_id
+                user = get_object_or_404(User, id=seller_id)
+                user.rating_score = user.rating_score + score
+                user.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            # return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

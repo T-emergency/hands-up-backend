@@ -1,4 +1,3 @@
-# 
 from django.db import models
 from user.models import User
 from chat.models import TradeChatRoom, AuctionChatRoom
@@ -23,7 +22,7 @@ class Goods(models.Model):
     start_price = models.IntegerField(blank=True, null=True)
     high_price = models.IntegerField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
-    start_time = models.DateTimeField(blank=True, null=True)
+    start_time = models.CharField(max_length=256, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
