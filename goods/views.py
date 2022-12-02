@@ -2,14 +2,16 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from .serializers import GoodsPostSerializer
+from .serializers import GoodsPostSerializer,GoodImageSerializer
 from .models import GoodsImage, Goods
 
 class GoodsPostView(APIView):
     def post(self, request):
         print('post views실행')
         user = request.user
-
+        print(request.data)
+        print(request.data['image'])
+        serialize_image = GoodImageSerializer(data = request.data['image'])
         serialize_post = GoodsPostSerializer(data = request.data, context={'request':request}) #request받기
         # 유효성 검사
         print('vaild 직전')

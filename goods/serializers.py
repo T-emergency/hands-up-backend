@@ -4,6 +4,7 @@ from .models import Goods,GoodsImage
 class GoodImageSerializer(serializers.ModelSerializer):
 
     image = serializers.ImageField(use_url=True)
+    
     print('goodsimage serializer')
     class Meta:
         model = GoodsImage

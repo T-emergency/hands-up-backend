@@ -12,21 +12,21 @@ class Goods(models.Model):
 
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sell_goods')
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buy_goods', null=True)
-    trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE)
+    trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE, null=True)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=256)
     content = models.TextField()
     category = models.CharField(max_length=32)
-    status = models.BooleanField(null=True)
+    status = models.BooleanField(null=True, blank =True)
     predict_price = models.IntegerField()
     start_price = models.IntegerField()
-    high_price = models.IntegerField(null=True)
-    start_date = models.DateField(null = True)
-    start_time = models.DateTimeField(null=True)
+    high_price = models.IntegerField(null=True, blank=True)
+    start_date = models.DateField()
+    start_time = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    like = models.ManyToManyField(User, related_name='like_goods', null=True)
+    like = models.ManyToManyField(User, related_name='like_goods', blank=True)
 
 
 
