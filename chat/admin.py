@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import TradeChatRoom, AuctionChatRoom
 
-# Register your models here.
+admin.site.register(TradeChatRoom)
+admin.site.register(AuctionChatRoom)

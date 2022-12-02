@@ -25,12 +25,13 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, password=None):
+    def create_superuser(self, phone,username, password=None):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
         """
         user = self.create_user(
+            phone = phone,
             username=username,
             password=password,
         )
@@ -41,7 +42,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     class Meta:
-        db_table = 'user'
+        db_table = 'User'
     phone = models.CharField(
         verbose_name = 'phone',
         max_length = 15,
@@ -57,7 +58,7 @@ class User(AbstractBaseUser):
     profile_image = models.ImageField(upload_to='media', height_field=None, width_field=None, default='default.jpeg', blank=True)
     kakao_id = models.CharField(max_length=100, blank=True)
 
-    rating_score = models.SmallIntegerField()
+    rating_score = models.SmallIntegerField(default=30)
     is_active = models.BooleanField(default=True)
 
 
