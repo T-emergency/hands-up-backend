@@ -50,19 +50,20 @@ class ReviewAPIView(APIView):
                 print("바이어id",goods_obj.buyer_id)
                 print("셀러id",goods_obj.seller_id)
                 print("유저 id",request.user.id)
-                if review_exist==False:
-                    if request.user.id==goods_obj.seller_id:
-                        buyer_id=goods_obj.buyer_id
-                        user = get_object_or_404(User, id=buyer_id)
-                        user.rating_score = user.rating_score + score
-                        user.save()
-                        return Response(serializer.data, status=status.HTTP_200_OK)
-                    elif request.user.id==goods_obj.buyer_id:
-                        seller_id=goods_obj.seller_id
-                        user = get_object_or_404(User, id=seller_id)
-                        user.rating_score = user.rating_score + score
-                        user.save()
-                        return Response(serializer.data, status=status.HTTP_200_OK)
+                if request.user.id==goods_obj.seller_id:
+                    buyer_id=goods_obj.buyer_id
+                    user = get_object_or_404(User, id=buyer_id)
+                    user.rating_score = user.rating_score + score
+                    user.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    
+                elif request.user.id==goods_obj.buyer_id:
+                    seller_id=goods_obj.seller_id
+                    user = get_object_or_404(User, id=seller_id)
+                    user.rating_score = user.rating_score + score
+                    user.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                            
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:

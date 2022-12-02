@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     # CORS provider
     'corsheaders',
 
-    
+    # crontab
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -200,6 +201,11 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+# crontab
+CRONJOBS = [
+    # 매주 월요일 새벽 1시 비매너 유저 제재
+    ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+]
 
 
 # LOGGING = {
