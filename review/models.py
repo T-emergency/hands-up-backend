@@ -2,7 +2,7 @@
 from django.db import models
 from user.models import User
 from goods.models import Goods
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 
@@ -14,5 +14,11 @@ class Review(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
-    manner_score = models.SmallIntegerField(default=40)
+    manner_score = models.SmallIntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(1),
+            MinValueValidator(-1)
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
