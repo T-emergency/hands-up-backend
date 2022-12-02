@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # service app
     'user',
     'review',
-    'chat',
     'board',
     'goods',
     'chat',
