@@ -5,6 +5,7 @@ from goods.models import Goods
 
 
 
+
 class Review(models.Model):
     class Meta:
         db_table = 'Review'

@@ -7,7 +7,7 @@ from rest_framework.generics import get_object_or_404
 from .serializers import ReviewCreateSerializer
 from goods.models import Goods
 from user.models import User
-
+from .models import Review
 
 class ReviewAPIView(APIView):
     """
@@ -40,34 +40,34 @@ class ReviewAPIView(APIView):
         
         # score=request.data.get('manner_score')
         serializer = ReviewCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user = request.user, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-            print("시리얼",serializer.data)
-            score=serializer.data.get('manner_score')
-            print(score)
-            print("바이어id",goods_obj.buyer_id)
-            print("셀러id",goods_obj.seller_id)
-            print("유저 id",request.user.id)
-            # evaluated_user_obj = get_object_or_404(User, id=buyer_id)
-            # print("매너점수",evaluated_user_obj.rating_score)
-            # print("매너점수",goods_obj.rating_score)
-            
-            if request.user.id==goods_obj.seller_id:
-                buyer_id=goods_obj.buyer_id
-                user = get_object_or_404(User, id=buyer_id)
-                user.rating_score = user.rating_score + score
-                user.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            elif request.user.id==goods_obj.buyer_id:
-                seller_id=goods_obj.seller_id
-                user = get_object_or_404(User, id=seller_id)
-                user.rating_score = user.rating_score + score
-                user.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-
-            # return Response(serializer.data, status=status.HTTP_200_OK)
+        review_exist=Review.objects.filter(goods_id=goods_id, user_id=request.user.id).exists()
+        if review_exist==False:
+            if serializer.is_valid():
+                serializer.save(user = request.user, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
+                print("시리얼",serializer.data)
+                score=serializer.data.get('manner_score')
+                print(score)
+                print("바이어id",goods_obj.buyer_id)
+                print("셀러id",goods_obj.seller_id)
+                print("유저 id",request.user.id)
+                if review_exist==False:
+                    if request.user.id==goods_obj.seller_id:
+                        buyer_id=goods_obj.buyer_id
+                        user = get_object_or_404(User, id=buyer_id)
+                        user.rating_score = user.rating_score + score
+                        user.save()
+                        return Response(serializer.data, status=status.HTTP_200_OK)
+                    elif request.user.id==goods_obj.buyer_id:
+                        seller_id=goods_obj.seller_id
+                        user = get_object_or_404(User, id=seller_id)
+                        user.rating_score = user.rating_score + score
+                        user.save()
+                        return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response("이미 평가를 했어요", status=status.HTTP_400_BAD_REQUEST)
+
 
 
     # def post(self, request, trade_room_id):
