@@ -62,10 +62,6 @@ class User(AbstractBaseUser):
 
     rating_score = models.SmallIntegerField(
         default=0,
-        validators=[
-            MaxValueValidator(100),
-            MinValueValidator(0)
-        ]
     )
     is_active = models.BooleanField(default=True)
 

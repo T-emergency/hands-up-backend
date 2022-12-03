@@ -15,10 +15,12 @@ class Review(models.Model):
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
     manner_score = models.SmallIntegerField(
-        default=0,
-        validators=[
-            MaxValueValidator(1),
-            MinValueValidator(-1)
+            default=50,
+            validators=[
+            MaxValueValidator(5),
+            MinValueValidator(-20)
         ]
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+# 
