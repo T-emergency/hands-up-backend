@@ -68,7 +68,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'sender': user.id,
             'sender_name': user.username,
             'goods_id': goods_id,
-            'high_price' : money
+            'high_price' : goods.high_price
           }
 
         else:
