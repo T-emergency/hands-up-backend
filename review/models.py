@@ -11,10 +11,11 @@ class Review(models.Model):
         db_table = 'Review'
         ordering = ['-created_at']
 
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    author = models.ForeignKey(User, on_delete = models.CASCADE, related_name='review_author')
+    receiver = models.ForeignKey(User, on_delete = models.CASCADE, related_name='review_receiver')
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
-    content = models.CharField(max_length=500, blank=False)
-    manner_score = models.SmallIntegerField(
+    content = models.CharField(max_length=100, blank=False)
+    score = models.SmallIntegerField(
             default=50,
             validators=[
             MaxValueValidator(5),
@@ -23,4 +24,3 @@ class Review(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-# 
