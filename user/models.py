@@ -61,7 +61,7 @@ class User(AbstractBaseUser):
     kakao_id = models.CharField(max_length=100, blank=True)
 
     rating_score = models.SmallIntegerField(
-        default=0,
+        default=40,
     )
     is_active = models.BooleanField(default=True)
 
