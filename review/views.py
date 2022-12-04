@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 
-from .serializers import ReviewCreateSerializer
+from .serializers import ReviewCreateSerializer, ReviewListSerializer
 from goods.models import Goods
 from user.models import User
 from .models import Review
@@ -99,4 +99,7 @@ class ReviewListAPIView(APIView):
         """
         판매자 정보에 들어갔을때 후기모음
         """
-        goods = Goods.objects.filter(seller_id=user_id)
+        review_list = Review.objects.filter(receiver_id=user_id)
+        review_list_order_by = review_list.order_by('-created_at')
+        serializer=ReviewListSerializer(review_list_order_by, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
