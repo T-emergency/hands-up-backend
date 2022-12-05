@@ -4,9 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from .serializers import CustomTokenObtainPairSerializer, UserSerializer
+from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer
 from .models import User
-
+from goods.models import Goods,GoodsImage
 
 class UserView(APIView):
     def get(self, request):
@@ -51,3 +51,28 @@ class UserView(APIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+
+# User profile
+class UserProfileView(APIView):
+    def get(self, request, user_id):
+        user = User.objects.get(id = user_id)
+
+        #판매내역
+        sell_goods = Goods.objects.filter(serller = user_id)
+        serialize_sell = ProfileSerializer(sell_goods)
+        #구매내역
+        buy_goods = Goods.objects.filter(buyer = user_id)
+        serialize_buy = ProfileSerializer(buy_goods)
+        #관심목록
+        like_goods = Goods.objects.filter(like = user_id)
+        serialize_like = ProfileSerializer(like_goods)
+
+        data = {
+            "sell_goods":serialize_sell.data,
+            "buy_goods":serialize_buy.data,
+            "like_goods":serialize_like,
+        }
+
+        return Response(data)
