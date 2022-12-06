@@ -28,7 +28,7 @@ class AuctionChatRoom(models.Model):
 class AuctionMessage(models.Model):
     class Meta:
         db_table = 'AuctionMessage'
-        ordering = ['-created_at']
+        # ordering = ['-created_at']
     
     author = models.ForeignKey(User, on_delete = models.CASCADE)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete = models.CASCADE)
