@@ -219,6 +219,13 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+CRONJOBS = [
+    # ('* * * * *', 'goods.cron.test_one_minute', '>> /tmp/log/ggbc_cron.log'),
+    ('* * * * *', 'goods.cron.test_one_minute', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('* * * * *', 'goods.cron.get_goods_status', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+]
+
 
 # LOGGING = {
 #     'version': 1,	#logging 버젼
