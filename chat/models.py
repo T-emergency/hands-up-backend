@@ -34,3 +34,12 @@ class AuctionMessage(models.Model):
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete = models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class AuctionParticipant(models.Model):
+    class Meta:
+        db_table = 'AuctionParticipant'
+
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    goods = models.ForeignKey("goods.Goods", on_delete = models.CASCADE)
