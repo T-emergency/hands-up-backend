@@ -37,7 +37,6 @@ class AuctionMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-
 class AuctionParticipant(models.Model):
     class Meta:
         db_table = 'AuctionParticipant'
