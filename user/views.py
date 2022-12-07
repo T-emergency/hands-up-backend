@@ -6,7 +6,9 @@ from rest_framework.response import Response
 
 from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer
 from .models import User
-from goods.models import Goods,GoodsImage
+from goods.models import Goods
+
+from goods.serializers import GoodsPostSerializer
 
 class UserView(APIView):
     def get(self, request):
@@ -62,13 +64,13 @@ class UserProfileView(APIView):
 
         #판매내역
         sell_goods = Goods.objects.filter(seller_id = user_id)
-        serialize_sell = ProfileSerializer(sell_goods, many=True)
+        serialize_sell = GoodsPostSerializer(sell_goods, many=True)
         #구매내역
         buy_goods = Goods.objects.filter(buyer_id = user_id)
-        serialize_buy = ProfileSerializer(buy_goods,many=True)
+        serialize_buy = GoodsPostSerializer(buy_goods,many=True)
         #관심목록
         like_goods = Goods.objects.filter(like = user_id)
-        serialize_like = ProfileSerializer(like_goods,many=True)
+        serialize_like = GoodsPostSerializer(like_goods,many=True)
         print(".........data에 묶기 전")
         user_data = {
             "sell_goods":serialize_sell.data,
