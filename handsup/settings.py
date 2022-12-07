@@ -208,19 +208,19 @@ CRONJOBS = [
 ]
 
 
-LOGGING = {
-    'version': 1,	#logging 버젼
-    'disable_existing_loggers': False, # 원래 있던 로깅들을 그래도 냅둠 # 만약 True면 못쓴다는 거겠죠? ㅎ
-    'handlers': {					# 로깅 메세지에서 일어나는 일을 결정하는 녀석이라고 장고공식문서에 나와있는데, 아직 무슨말인지는 저도 모르겠네요 ㅎㅎ 
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        }
-    },
-    'loggers': {				# 로깅을 console에 띄울지 ... 다른데 띄울지 그냥 DEBUG용으로 레벨을 설정할 수 도있고, 
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    }
-}
+# LOGGING = {
+#     'version': 1,	#logging 버젼
+#     'disable_existing_loggers': False, # 원래 있던 로깅들을 그래도 냅둠 # 만약 True면 못쓴다는 거겠죠? ㅎ
+#     'handlers': {					# 로깅 메세지에서 일어나는 일을 결정하는 녀석이라고 장고공식문서에 나와있는데, 아직 무슨말인지는 저도 모르겠네요 ㅎㅎ 
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         }
+#     },
+#     'loggers': {				# 로깅을 console에 띄울지 ... 다른데 띄울지 그냥 DEBUG용으로 레벨을 설정할 수 도있고, 
+#         'django.db.backends': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#         },
+#     }
+# }

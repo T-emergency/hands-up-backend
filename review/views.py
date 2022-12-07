@@ -43,10 +43,12 @@ class ReviewAPIView(APIView):
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
         score=int(request.data.get('score'))
-        if review_exist==False:
+        if review_exist==True:
             """
             리뷰 1회 제한
             """
+            return Response("이미 평가를 했어요", status=status.HTTP_400_BAD_REQUEST)
+        else:
             if serializer.is_valid() and request.user.id==goods_obj.seller_id:
                 """
                 author 셀러일때 review의 receiver 저장
@@ -55,7 +57,9 @@ class ReviewAPIView(APIView):
                 buyer.rating_score = buyer.rating_score + int(score)
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-                if score == -20:
+                if score != -20:
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
                     try:
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.buyer_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
@@ -64,8 +68,6 @@ class ReviewAPIView(APIView):
                             return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
                     except:
                         return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
-                else:
-                    return Response(serializer.data, status=status.HTTP_200_OK)
 
             elif serializer.is_valid() and request.user.id==goods_obj.buyer_id:
                 """
@@ -75,7 +77,9 @@ class ReviewAPIView(APIView):
                 seller.rating_score = seller.rating_score + int(score)
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-                if score == -20:
+                if score != -20:
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
                     try:
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.seller_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
@@ -84,12 +88,8 @@ class ReviewAPIView(APIView):
                             return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
                     except:
                         return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
-                else:
-                    return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
-        else:
-            return Response("이미 평가를 했어요", status=status.HTTP_400_BAD_REQUEST)
 
 
 
