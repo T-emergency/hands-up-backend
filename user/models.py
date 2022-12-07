@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 
 
 
@@ -58,7 +60,9 @@ class User(AbstractBaseUser):
     profile_image = models.ImageField(upload_to='media', height_field=None, width_field=None, default='default.jpeg', blank=True)
     kakao_id = models.CharField(max_length=100, blank=True)
 
-    rating_score = models.SmallIntegerField(default=30)
+    rating_score = models.SmallIntegerField(
+        default=40,
+    )
     is_active = models.BooleanField(default=True)
 
 

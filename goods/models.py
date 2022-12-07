@@ -1,4 +1,3 @@
-# 
 from django.db import models
 from user.models import User
 from chat.models import TradeChatRoom, AuctionChatRoom
@@ -23,10 +22,10 @@ class Goods(models.Model):
     start_price = models.IntegerField()
     high_price = models.IntegerField(null=True, blank=True)
     start_date = models.DateField()
-    start_time = models.CharField(max_length=100)
+    start_time = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    like = models.ManyToManyField(User, related_name='like_goods', blank=True)
+    like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
 
 
 
@@ -35,6 +34,7 @@ class GoodsImage(models.Model):
         db_table = "GoodsImage"
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/')
+
 
 
 
