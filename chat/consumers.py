@@ -228,9 +228,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
       return bool, int
       """
 
-      # create 된다면 True 반환
-      participants = AuctionParticipant.objects.filter(goods_id = goods_id)
       # get_or_create()를 사용해서 participants에서 사용 불가
+      participants = AuctionParticipant.objects.filter(goods_id = goods_id)
+      # create 된다면 True 반환
       participant, is_first = AuctionParticipant.objects.get_or_create(goods_id = goods_id,user_id = user_id)
 
 

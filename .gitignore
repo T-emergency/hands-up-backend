@@ -258,3 +258,5 @@ cython_debug/
 
 my_settings.py
 migrations/
+.vscode/
+venv2/
