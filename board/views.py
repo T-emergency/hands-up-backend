@@ -55,12 +55,12 @@ class FreeCommentListView(APIView):
     def get(self, request, free_article_id):
         freearticle = get_object_or_404(FreeArticle, id=free_article_id)
         comments = freearticle.comment.all()
-        serializer = FreeCommentListSerializer(comments, many=True)
+        serializer = FreeCommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 #자유게시판 댓글 작성
     def post(self, request, free_article_id):
-        serializer = FreeCommentCreateSerializer(data=request.data)
+        serializer = FreeCommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user, free_article_id=free_article_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
