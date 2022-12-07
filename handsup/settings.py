@@ -42,17 +42,17 @@ INSTALLED_APPS = [
     # service app
     'user',
     'review',
-    
+    'chat',
     'board',
-    'auction',
-    # 'goods',
+    # 'auction',
+    'goods',
 
     # django
     'rest_framework',
     'rest_framework_simplejwt',
 
     # CORS provider
-    'corsheaders',
+    # 'corsheaders',
 
     
 ]
@@ -143,7 +143,7 @@ USE_TZ = False
 
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
-STATICFILES_DIRS = [STATIC_DIR]
+STATICFILES_DIRS = [BASE_DIR]
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
