@@ -5,7 +5,12 @@ from rest_framework_simplejwt.views import (
 )
 from user.views import CustomTokenObtainPairView, UserView
 
+from . import views
+
 urlpatterns = [
+
+    #user profile
+    path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile'),
 
     path('', UserView.as_view(), name='user_view'),
 

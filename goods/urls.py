@@ -1,3 +1,6 @@
+from django.urls import path
+from . import views
+
 urlpatterns = [
-    # path('/', FreeListView.as_view(), name='free_list_view')
+    path('', views.GoodsPostView.as_view(), name='goods_post_view'),
 ]
