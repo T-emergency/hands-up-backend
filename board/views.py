@@ -26,7 +26,7 @@ class ReportListArticleView(APIView):
 
 class ReportArticleDetailView(APIView):
 
-    def get(self,request,report_article_id):
+    def get(self,request,report_articlefgg_id):
         article=get_object_or_404(ReportArticle,id=report_article_id)
         serializer = ReportArticleSerializer(article)
         return Response({'get succees':serializer.data},status=status.HTTP_200_OK)
