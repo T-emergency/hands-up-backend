@@ -57,22 +57,24 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 # User profile
 class UserProfileView(APIView):
     def get(self, request, user_id):
-        user = User.objects.get(id = user_id)
+
+        print(user_id)
 
         #판매내역
-        sell_goods = Goods.objects.filter(serller = user_id)
-        serialize_sell = ProfileSerializer(sell_goods)
+        sell_goods = Goods.objects.filter(seller_id = user_id)
+        serialize_sell = ProfileSerializer(sell_goods, many=True)
         #구매내역
-        buy_goods = Goods.objects.filter(buyer = user_id)
-        serialize_buy = ProfileSerializer(buy_goods)
+        buy_goods = Goods.objects.filter(buyer_id = user_id)
+        serialize_buy = ProfileSerializer(buy_goods,many=True)
         #관심목록
         like_goods = Goods.objects.filter(like = user_id)
-        serialize_like = ProfileSerializer(like_goods)
-
-        data = {
+        serialize_like = ProfileSerializer(like_goods,many=True)
+        print(".........data에 묶기 전")
+        user_data = {
             "sell_goods":serialize_sell.data,
             "buy_goods":serialize_buy.data,
-            "like_goods":serialize_like,
+            "like_goods":serialize_like.data,
         }
+        print('-------data에 묶은 후')
 
-        return Response(data)
+        return Response(user_data)

@@ -163,10 +163,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500']
+# CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501']
 # 예외 없이 다 수락
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 SIMPLE_JWT = {
