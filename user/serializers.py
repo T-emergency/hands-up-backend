@@ -22,7 +22,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password','profile_image']
+        fields = '__all__'#['username', 'password','profile_image']
         extra_kwargs = {
             'password': {'write_only': True},
             "username": {"error_messages": {"required": "Give yourself a username"}}
