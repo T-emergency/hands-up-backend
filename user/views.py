@@ -60,8 +60,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UserProfileView(APIView):
     def get(self, request, user_id):
 
-        print(user_id)
-
         #판매내역
         sell_goods = Goods.objects.filter(seller_id = user_id)
         serialize_sell = GoodsPostSerializer(sell_goods, many=True)
