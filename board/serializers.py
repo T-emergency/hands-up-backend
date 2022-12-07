@@ -12,6 +12,7 @@ class FreeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreeArticle
         fields = ('title', 'content', 'author', 'image',)
+        read_only_fields = ('author','image',)
         extra_kwargs = {'title': {
                         'error_messages': {
                         'required': '제목을 입력해주세요',
@@ -30,13 +31,7 @@ class FreeDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class FreeCommentListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreeArticle
-        fields = "__all__"
-
-
-class FreeCommentCreateSerializer(serializers.ModelSerializer):
+class FreeCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreeArticle
         fields = "__all__"

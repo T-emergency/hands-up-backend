@@ -10,6 +10,7 @@ class FreeArticle(models.Model):
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
     updated_at = models.DateTimeField('수정 시간', auto_now=True)
     image = models.ImageField(upload_to='', null=True, blank=True)
+    
     author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
 
     class Meta: 
