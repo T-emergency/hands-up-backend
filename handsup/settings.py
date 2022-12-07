@@ -24,14 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-qmer4$u7sivk=1_m6_-zg&quo7=srdnwm+)p1quqyepo^b&^d1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # goods(auction) user community review?
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,6 +58,11 @@ INSTALLED_APPS = [
 
     # crontab
     'django_crontab',
+    
+    # Router
+    'channels',
+    
+
 ]
 
 MIDDLEWARE = [
@@ -87,7 +95,19 @@ TEMPLATES = [
     },
 ]
 
+# Channels
 WSGI_APPLICATION = 'handsup.wsgi.application'
+
+ASGI_APPLICATION = 'handsup.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    },
+}
 
 
 REST_FRAMEWORK = {
@@ -205,19 +225,23 @@ SIMPLE_JWT = {
 CRONJOBS = [
     # 매주 월요일 새벽 1시 비매너 유저 제재
     ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+
+    # 매분
+    ('* * * * *', 'goods.cron.get_goods_status', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
 ]
 
 
 # LOGGING = {
 #     'version': 1,	#logging 버젼
 #     'disable_existing_loggers': False, # 원래 있던 로깅들을 그래도 냅둠 # 만약 True면 못쓴다는 거겠죠? ㅎ
-#     'handlers': {					# 로깅 메세지에서 일어나는 일을 결정하는 녀석이라고 장고공식문서에 나와있는데, 아직 무슨말인지는 저도 모르겠네요 ㅎㅎ 
+#     'handlers': {					# 로깅 메세지에서 일어나는 일을 결정하는 녀석이라고 장고공식문서에 나와있는데, 아직 무슨말인지는 저도 모르겠네요 ㅎㅎ
 #         'console': {
 #             'level': 'DEBUG',
 #             'class': 'logging.StreamHandler',
 #         }
 #     },
-#     'loggers': {				# 로깅을 console에 띄울지 ... 다른데 띄울지 그냥 DEBUG용으로 레벨을 설정할 수 도있고, 
+#     'loggers': {				# 로깅을 console에 띄울지 ... 다른데 띄울지 그냥 DEBUG용으로 레벨을 설정할 수 도있고,
 #         'django.db.backends': {
 #             'handlers': ['console'],
 #             'level': 'DEBUG',

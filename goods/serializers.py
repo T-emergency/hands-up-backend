@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Goods,GoodsImage
+
+from .models import Goods, GoodsImage, BidPrice
+
+
 
 class GoodsImageSerializer(serializers.ModelSerializer):
     
@@ -8,19 +11,30 @@ class GoodsImageSerializer(serializers.ModelSerializer):
         fields =['image',]
 
 
-class GoodsPostSerializer(serializers.ModelSerializer):
-    # goodsimage_set = GoodsImageSerializer(many = True, read_only=True)
+
+class GoodsSerializer(serializers.ModelSerializer):
+    seller = serializers.SerializerMethodField()
+    auction_room = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
 
+
     def get_images(self, obj):
-        
         image = obj.goodsimage_set.all()
         return GoodsImageSerializer(image, many = True).data
+    
 
+    def get_seller(self,obj):
+        return obj.seller.username
+        
+    
+    def get_auction_room(self, obj):
+        return obj.auction_room.id
+        
     class Meta:
         model = Goods
         fields = '__all__'
-        read_only_fields = ("seller",)
+        read_only_fields = ('seller','buyer','trade_room','status','high_price','auction_room')
+
 
     def create(self, validated_data):
         
@@ -31,3 +45,10 @@ class GoodsPostSerializer(serializers.ModelSerializer):
             GoodsImage.objects.create(goods = instance, image = image_date)
         return instance
 
+     
+     
+class BidPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BidPrice
+        fields = '__all__'
+        read_only_fields = ('buyer',)
