@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # model
 from user.models import User
+from goods.models import Goods
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -36,3 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save() # 다시 저장?
         return user
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goods
+        fields = "__all__"
