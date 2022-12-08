@@ -1,6 +1,11 @@
+# drf
 from rest_framework import serializers
 
-from .models import Goods, GoodsImage, BidPrice
+# serializer
+from user.serializers import UserSerializer
+
+# models
+from .models import Goods, GoodsImage
 
 
 
@@ -11,44 +16,39 @@ class GoodsImageSerializer(serializers.ModelSerializer):
         fields =['image',]
 
 
-
 class GoodsSerializer(serializers.ModelSerializer):
-    seller = serializers.SerializerMethodField()
-    auction_room = serializers.SerializerMethodField()
+
+    seller = UserSerializer(read_only = True)
+    buyer = UserSerializer(read_only = True)
+    is_like = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
 
 
     def get_images(self, obj):
-        image = obj.goodsimage_set.all()
-        return GoodsImageSerializer(image, many = True).data
-    
+        if self.context["action"] == 'list':
+            try:
+                return GoodsImageSerializer(obj.goodsimage_set.all()[0]).data
+            except IndexError:
+                return None
+        else:
+            return GoodsImageSerializer(obj.goodsimage_set.all(), many = True).data
 
-    def get_seller(self,obj):
-        return obj.seller.username
-        
-    
-    def get_auction_room(self, obj):
-        return obj.auction_room.id
-        
-    class Meta:
-        model = Goods
-        fields = '__all__'
-        read_only_fields = ('seller','buyer','trade_room','status','high_price','auction_room')
+
+    def get_is_like(self, obj):
+        user = self.context['request'].user
+        flag = user in obj.like.all()
+        return flag
 
 
     def create(self, validated_data):
-        
         instance = super().create(validated_data)
-        image_set = self.context['request'].FILES.getlist('files')
-       
-        for image_date in image_set:
-            GoodsImage.objects.create(goods = instance, image = image_date)
+        image_set = self.context['request'].FILES.getlist('images')
+        image_list = [GoodsImage(goods = instance, image = image) for image in image_set]
+        GoodsImage.objects.bulk_create(image_list)
         return instance
 
-     
-     
-class BidPriceSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = BidPrice
+        model = Goods
         fields = '__all__'
-        read_only_fields = ('buyer',)
+        read_only_fields = ['like', 'status']

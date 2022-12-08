@@ -1,7 +1,10 @@
 from django.db import models
+# models
 from user.models import User
 from chat.models import TradeChatRoom, AuctionChatRoom
 
+# validators
+from django.core.validators import validate_image_file_extension
 
 class Goods(models.Model):
     class Meta:
@@ -28,7 +31,6 @@ class Goods(models.Model):
 
 
 
-from django.core.validators import validate_image_file_extension
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension])
