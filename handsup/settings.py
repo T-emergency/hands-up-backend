@@ -33,16 +33,17 @@ INSTALLED_APPS = [
     # service app
     'user',
     'review',
-    'board',
-    'goods',
     'chat',
+    'board',
+    # 'auction',
+    'goods',
 
     # django
     'rest_framework',
     'rest_framework_simplejwt',
 
     # CORS provider
-    'corsheaders',
+    # 'corsheaders',
 
     # crontab
     'django_crontab',

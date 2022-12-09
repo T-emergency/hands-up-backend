@@ -52,7 +52,7 @@ class FreeArticleComment(models.Model):
         return str(self.content)
 
     class Meta:
-        db_table = 'FreeArticleComment'
+        db_table = 'Freecomment'
         ordering = ['-created_at']
 
 #제보게시판 댓글
@@ -60,16 +60,12 @@ class ReportArticleComment(models.Model):
 
     content = models.TextField('내용', max_length=200)
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
-    updated_at = models.DateTimeField('수정 시간', auto_now=True)
-    author = models.ForeignKey(
-        User, verbose_name='작성자', on_delete=models.CASCADE)
-
-    article = models.ForeignKey(
-        ReportArticle, verbose_name='제품게시글', on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
+    article = models.ForeignKey(ReportArticle, verbose_name='제품게시글',on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.content
 
     class Meta:
-        db_table = 'ReportArticleComment'
+        db_table = 'Reportcomment'
         ordering = ['-created_at']
