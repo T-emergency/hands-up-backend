@@ -1,10 +1,11 @@
 # django
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
 
 from .serializers import ReviewCreateSerializer, ReviewListSerializer
+from user.serializers import UserSerializer
 from goods.models import Goods
 from user.models import User
 from .models import Review
@@ -12,6 +13,7 @@ from django.db.models import Q
 
 
 class ReviewAPIView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
     """
     리뷰를 남기면서 상대방의 매너를 평가하는 기능
     """
@@ -42,7 +44,8 @@ class ReviewAPIView(APIView):
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
-        score=int(request.data.get('score'))
+        score=(request.data.get('score'))
+        print(score)
         if review_exist==True:
             """
             리뷰 1회 제한
@@ -94,12 +97,51 @@ class ReviewAPIView(APIView):
 
 
 
-class ReviewListAPIView(APIView):
+class UserInfoAPIView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
     def get(self, request, user_id):
+        
         """
         판매자 정보에 들어갔을때 후기모음
         """
-        review_list = Review.objects.filter(receiver_id=user_id)
+        #시리얼라이저 여러개를 통해서 정보 다 불러오고 여기서 한번에 프론트로 넘겨줌
+        # 필요한 것 후기 : 작성자 id 리뷰내용 시간
+        # id 아니까 보는 id의 받은 점수 개수
+        # 시리얼라이저데이터 두개 보내주고 시리얼라이저에서 처리??
+        # 유저아이디 받은거 처리하고 시리얼에 보내줌 여기서 처리 다 하고 보내주는게 맞는듯 근데 json으로 가야함
+        # 지금 내가 정리한 바로는 시리얼라이저 통과시키고 보내야하는데 memo 처럼 모델에맞게         serializer = StudyLogSerializer(
+        # study_log, data={"memo": memo}, partial=True) 이렇게 같이 보내주는건 당연하게 되는데 지금 그냥 숫자는 보낼수가 없음
+        # 지금 api를 따로해서 보내고 시리얼라이저에서 값을 처리한다(아직 방법은 모름) 쿼리가 두번 되는거라 고민 그렇게 레스트풀하지않나? 아니면 쿼리는 같은숫자로 보내지는걸까
+        # 콘솔에서 본 바로는 하나의 받아온곳에서 카운트 숫자면 몇개있는게 불가능 해보이는데 obj하나씩 관련한건 가능 뭐likes나(매투매) 자신을 바라보고있는 코멘트들의 수 count에 조건 가능????
+        # 뭐 카운트 올려서 할 수 있으려나
+        # 프로필에 연결된 url 함수
+        # 유저 들어온다 
+        review_list=Review.objects.filter(receiver_id=user_id)
         review_list_order_by = review_list.order_by('-created_at')
         serializer=ReviewListSerializer(review_list_order_by, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        bad_review_count = review_list.filter(score=-20).count()
+        soso_review_count = review_list.filter(score=0).count()
+        good_review_count = review_list.filter(score=3).count()
+        excellent_review_count = review_list.filter(score=5).count()
+
+        receiver=User.objects.get(id=user_id) # 받아오고 시리얼라이저
+        receiver_serializer=UserSerializer(receiver)
+
+        image=[]
+        for review in review_list_order_by:
+            author=UserSerializer(review.author).data['profile_image']
+            image.append(author)
+            print(author)
+
+        data = {
+            "bad_review_count":bad_review_count,
+            "soso_review_count":soso_review_count,
+            "good_review_count":good_review_count,
+            "excellent_review_count":excellent_review_count,
+            "results":serializer.data,
+            "receiver":receiver_serializer.data,
+            "review_image":image
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
