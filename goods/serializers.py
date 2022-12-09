@@ -14,8 +14,9 @@ class GoodsImageSerializer(serializers.ModelSerializer):
 
 class GoodsSerializer(serializers.ModelSerializer):
     seller = serializers.SerializerMethodField()
-    auction_room = serializers.SerializerMethodField()
+    # auction_room = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    buyer = serializers.SerializerMethodField()
 
 
     def get_images(self, obj):
@@ -26,9 +27,14 @@ class GoodsSerializer(serializers.ModelSerializer):
     def get_seller(self,obj):
         return obj.seller.username
         
-    
-    def get_auction_room(self, obj):
-        return obj.auction_room.id
+    def get_buyer(self,obj):
+        try:
+            username = obj.buyer.username
+        except:
+            return None
+        return username
+    # def get_auction_room(self, obj):
+    #     return obj.auction_room.id
         
     class Meta:
         model = Goods
