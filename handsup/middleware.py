@@ -28,7 +28,12 @@ class JwtAuthMiddleware(BaseMiddleware):
 
     async def __call__(self, scope, receive, send):
         close_old_connections()
-        token = parse_qs(scope["query_string"].decode("utf8"))["token"][0]
+        try:
+            token = parse_qs(scope["query_string"].decode("utf8"))["token"][0]
+        except KeyError:
+            scope["user"] = AnonymousUser()
+            return await super().__call__(scope, receive, send)
+            
 
         try:
             UntypedToken(token)
