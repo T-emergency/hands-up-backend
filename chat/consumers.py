@@ -8,7 +8,7 @@ from channels.db import database_sync_to_async
 from channels.auth import get_user_model
 
 # models
-from goods.models import Goods, BidPrice
+from goods.models import Goods
 from user.models import User
 from chat.models import AuctionParticipant, TradeMessage
 
@@ -245,6 +245,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 class ChatConsumerDirect(AsyncWebsocketConsumer):
 
     async def connect(self):
+        print("connet 진입성공")
         self.room_name = self.scope['url_route']['kwargs']['goods_id']
         self.room_group_name = 'chat_%s' % self.room_name
         
@@ -252,7 +253,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        
+        print(self.room_name, self.room_group_name )
         # 127.0.0.1:8000 포트에서 로그인 하는거 아님 의미 없음
         if self.scope.get('user').is_authenticated:
           print("유저 받기 성공")
@@ -294,6 +295,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         
         user = await self.get_user_obj(user_id)
         goods = await self.get_goods_obj(goods_id)
+        print(goods)
         # trade_room_id = goods.trade_room_id
         trade_room_id = goods["trade_room"]
 
@@ -313,12 +315,12 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         }
         
         goods_data = {
-          "buyer": goods["buyer"],
-          "seller": goods["seller"]
+          "buyer": goods["buyer"]["username"],
+          "seller": goods["seller"]["username"]
         }
         
         # print("response: ",response)
-        # print(goods["buyer"],goods["seller"],response["sender_name"])
+        print(goods["buyer"]["username"],goods["seller"]["username"],response["sender_name"])
 
         if response["sender_name"] == goods_data['buyer'] or response["sender_name"] == goods_data['seller']:
           await self.create_trade_message_obj(user_id, message, trade_room_id)
