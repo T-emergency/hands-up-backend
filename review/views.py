@@ -50,7 +50,7 @@ class ReviewAPIView(APIView):
             """
             리뷰 1회 제한
             """
-            return Response("이미 평가를 했어요", status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message":"이미 평가를 했어요"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if serializer.is_valid() and request.user.id==goods_obj.seller_id:
                 """
@@ -68,9 +68,9 @@ class ReviewAPIView(APIView):
                         if receiver_review_score['score'] == -20:
                             buyer.is_active = 0
                             buyer.save()
-                            return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
+                            return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
-                        return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
+                        return Response({"message":"연속적인 비매너는 아니네요"}, status=status.HTTP_200_OK)
 
             elif serializer.is_valid() and request.user.id==goods_obj.buyer_id:
                 """
@@ -88,9 +88,9 @@ class ReviewAPIView(APIView):
                         if receiver_review_score['score'] == -20:
                             seller.is_active = 0
                             seller.save()
-                            return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
+                            return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
-                        return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
+                        return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
 
@@ -125,14 +125,13 @@ class UserInfoAPIView(APIView):
         good_review_count = review_list.filter(score=3).count()
         excellent_review_count = review_list.filter(score=5).count()
 
-        receiver=User.objects.get(id=user_id) # 받아오고 시리얼라이저
+        receiver=User.objects.get(id=user_id)
         receiver_serializer=UserSerializer(receiver)
 
         image=[]
         for review in review_list_order_by:
             author=UserSerializer(review.author).data['profile_image']
             image.append(author)
-            print(author)
 
         data = {
             "bad_review_count":bad_review_count,
@@ -145,3 +144,5 @@ class UserInfoAPIView(APIView):
         }
 
         return Response(data, status=status.HTTP_200_OK)
+
+

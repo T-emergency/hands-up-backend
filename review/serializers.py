@@ -15,20 +15,16 @@ class ReviewListSerializer(serializers.ModelSerializer):
     # 거래후기 review에서 receiver id 지금 들어온 id인 리뷰 들고옴 작성자 id랑 시간 content 회원정보 이미지도 들고와야함
     author = serializers.SerializerMethodField()
     receiver = serializers.SerializerMethodField()
-    # image = serializers.SerializerMethodField()
+    created_at= serializers.SerializerMethodField()
 
     def get_author(self, obj):
         return obj.author.username
 
     def get_receiver(self, obj):
         return obj.receiver.username
-
-    # def get_image(self,obj):
-    #     author_obj = User.objects.get(id=obj.author_id)
-    #     author_img = author_obj.profile_image
-    #     print(author_img)
-    #     return author_img
     
+    def get_created_at(self,obj):
+        return str(obj.created_at)[:19]
     class Meta:
         model = Review
         fields = '__all__'
