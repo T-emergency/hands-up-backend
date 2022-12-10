@@ -1,10 +1,11 @@
 # django
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
 
-from .serializers import ReviewCreateSerializer
+from .serializers import ReviewCreateSerializer, ReviewListSerializer
+from user.serializers import UserSerializer
 from goods.models import Goods
 from user.models import User
 from .models import Review
@@ -12,6 +13,7 @@ from django.db.models import Q
 
 
 class ReviewAPIView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
     """
     리뷰를 남기면서 상대방의 매너를 평가하는 기능
     """
@@ -42,11 +44,14 @@ class ReviewAPIView(APIView):
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
-        score=int(request.data.get('score'))
-        if review_exist==False:
+        score=(request.data.get('score'))
+        print(score)
+        if review_exist==True:
             """
             리뷰 1회 제한
             """
+            return Response({"message":"이미 평가를 했어요"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
             if serializer.is_valid() and request.user.id==goods_obj.seller_id:
                 """
                 author 셀러일때 review의 receiver 저장
@@ -55,17 +60,17 @@ class ReviewAPIView(APIView):
                 buyer.rating_score = buyer.rating_score + int(score)
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-                if score == -20:
+                if score != -20:
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
                     try:
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.buyer_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             buyer.is_active = 0
                             buyer.save()
-                            return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
+                            return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
-                        return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
-                else:
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                        return Response({"message":"연속적인 비매너는 아니네요"}, status=status.HTTP_200_OK)
 
             elif serializer.is_valid() and request.user.id==goods_obj.buyer_id:
                 """
@@ -75,28 +80,69 @@ class ReviewAPIView(APIView):
                 seller.rating_score = seller.rating_score + int(score)
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
-                if score == -20:
+                if score != -20:
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
                     try:
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.seller_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             seller.is_active = 0
                             seller.save()
-                            return Response("연속적인 비매너로 정지", status=status.HTTP_200_OK)
+                            return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
-                        return Response("연속적인 비매너는 아니네요", status=status.HTTP_200_OK)
-                else:
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                        return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
-        else:
-            return Response("이미 평가를 했어요", status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
-class ReviewListAPIView(APIView):
+class UserInfoAPIView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
     def get(self, request, user_id):
+        
         """
         판매자 정보에 들어갔을때 후기모음
         """
-        goods = Goods.objects.filter(seller_id=user_id)
+        #시리얼라이저 여러개를 통해서 정보 다 불러오고 여기서 한번에 프론트로 넘겨줌
+        # 필요한 것 후기 : 작성자 id 리뷰내용 시간
+        # id 아니까 보는 id의 받은 점수 개수
+        # 시리얼라이저데이터 두개 보내주고 시리얼라이저에서 처리??
+        # 유저아이디 받은거 처리하고 시리얼에 보내줌 여기서 처리 다 하고 보내주는게 맞는듯 근데 json으로 가야함
+        # 지금 내가 정리한 바로는 시리얼라이저 통과시키고 보내야하는데 memo 처럼 모델에맞게         serializer = StudyLogSerializer(
+        # study_log, data={"memo": memo}, partial=True) 이렇게 같이 보내주는건 당연하게 되는데 지금 그냥 숫자는 보낼수가 없음
+        # 지금 api를 따로해서 보내고 시리얼라이저에서 값을 처리한다(아직 방법은 모름) 쿼리가 두번 되는거라 고민 그렇게 레스트풀하지않나? 아니면 쿼리는 같은숫자로 보내지는걸까
+        # 콘솔에서 본 바로는 하나의 받아온곳에서 카운트 숫자면 몇개있는게 불가능 해보이는데 obj하나씩 관련한건 가능 뭐likes나(매투매) 자신을 바라보고있는 코멘트들의 수 count에 조건 가능????
+        # 뭐 카운트 올려서 할 수 있으려나
+        # 프로필에 연결된 url 함수
+        # 유저 들어온다 
+        review_list=Review.objects.filter(receiver_id=user_id)
+        review_list_order_by = review_list.order_by('-created_at')
+        serializer=ReviewListSerializer(review_list_order_by, many=True)
+
+        bad_review_count = review_list.filter(score=-20).count()
+        soso_review_count = review_list.filter(score=0).count()
+        good_review_count = review_list.filter(score=3).count()
+        excellent_review_count = review_list.filter(score=5).count()
+
+        receiver=User.objects.get(id=user_id)
+        receiver_serializer=UserSerializer(receiver)
+
+        image=[]
+        for review in review_list_order_by:
+            author=UserSerializer(review.author).data['profile_image']
+            image.append(author)
+
+        data = {
+            "bad_review_count":bad_review_count,
+            "soso_review_count":soso_review_count,
+            "good_review_count":good_review_count,
+            "excellent_review_count":excellent_review_count,
+            "results":serializer.data,
+            "receiver":receiver_serializer.data,
+            "review_image":image
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+

@@ -16,7 +16,6 @@ class Review(models.Model):
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
     content = models.CharField(max_length=100, blank=False)
     score = models.SmallIntegerField(
-            default=50,
             validators=[
             MaxValueValidator(5),
             MinValueValidator(-20)
