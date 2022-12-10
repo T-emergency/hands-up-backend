@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # model
 from user.models import User
+from goods.models import Goods
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -22,7 +23,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password','profile_image']
+        fields = '__all__'#['username', 'password','profile_image']
         extra_kwargs = {
             'password': {'write_only': True},
             "username": {"error_messages": {"required": "Give yourself a username"}}
@@ -36,3 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save() # 다시 저장?
         return user
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goods
+        fields = "__all__"

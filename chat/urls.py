@@ -1,6 +1,6 @@
 from django.urls import path
-
+from . import views
 
 urlpatterns = [
-    # path('/', FreeListView.as_view(), name='free_list_view')
+    path('<int:goods_id>/',views.ChatRoomView.as_view(), name='chat_room'),
 ]
