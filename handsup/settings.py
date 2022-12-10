@@ -71,17 +71,31 @@ CHANNEL_LAYERS = {
 
 # Channels
 # WSGI_APPLICATION = 'handsup.wsgi.application'
-
+# # Channels
 # ASGI_APPLICATION = 'handsup.asgi.application'
+
 # CHANNEL_LAYERS = {
 #     'default': {
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         # 'CONFIG': {
-#         #     "hosts": [('127.0.0.1', 6379)],
-#         # },
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
 #     },
 # }
+
+# Channels
+WSGI_APPLICATION = 'handsup.wsgi.application'
+
+ASGI_APPLICATION = 'handsup.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    },
+}
 
 
 MIDDLEWARE = [
