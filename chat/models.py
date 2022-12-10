@@ -29,17 +29,10 @@ class AuctionChatRoom(models.Model):
 class AuctionMessage(models.Model):
     class Meta:
         db_table = 'AuctionMessage'
-<<<<<<< HEAD
-        # ordering = ['-created_at']
-    
-    author = models.ForeignKey(User, on_delete = models.CASCADE)
-    auction_room = models.ForeignKey(AuctionChatRoom, on_delete = models.CASCADE)
-=======
         ordering = ['-created_at']
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE)
->>>>>>> cc4e5634de79e8a1305114c2a2b8555190aa64c5
     content = models.CharField(max_length=500, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
