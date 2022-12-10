@@ -12,4 +12,3 @@ def cron_user_ban():
     for i in users:
         i.is_active = 0
         i.save()
-

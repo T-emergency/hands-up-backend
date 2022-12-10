@@ -14,8 +14,8 @@ class TradeMessage(models.Model):
     class Meta:
         db_table = 'TradeMessage'
 
-    author = models.ForeignKey(User, on_delete = models.CASCADE)
-    trade_room = models.ForeignKey(TradeChatRoom, on_delete = models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
     is_read = models.BooleanField(default=False)
 
@@ -23,14 +23,23 @@ class TradeMessage(models.Model):
 class AuctionChatRoom(models.Model):
     class Meta:
         db_table = 'AuctionChatRoom'
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class AuctionMessage(models.Model):
     class Meta:
         db_table = 'AuctionMessage'
         ordering = ['-created_at']
-    
-    author = models.ForeignKey(User, on_delete = models.CASCADE)
-    auction_room = models.ForeignKey(AuctionChatRoom, on_delete = models.CASCADE)
+
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AuctionParticipant(models.Model):
+    class Meta:
+        db_table = 'AuctionParticipant'
+
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    goods = models.ForeignKey("goods.Goods", on_delete = models.CASCADE)
