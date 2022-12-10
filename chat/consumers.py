@@ -372,7 +372,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       try:
         obj = Goods.objects.get(pk = goods_id)
-        serializer = GoodsSerializer(obj)
+        serializer = GoodsSerializer(obj, context={'action' : 'list'})
       except Goods.DoesNotExist:
         return False
       return serializer.data
