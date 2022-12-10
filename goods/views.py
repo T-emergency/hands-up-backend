@@ -153,3 +153,4 @@ class UserGoodsView(ModelViewSet):
 #             goods.like.add(user)
 
 #         return Response(status=status.HTTP_200_OK)
+        serializer.save(seller_id = self.request.user.id)

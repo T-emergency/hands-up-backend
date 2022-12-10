@@ -23,7 +23,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['goods_id']
         self.room_group_name = 'chat_%s' % self.room_name
-        
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -245,6 +244,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 class ChatConsumerDirect(AsyncWebsocketConsumer):
 
     async def connect(self):
+        print("connet 진입성공")
         self.room_name = self.scope['url_route']['kwargs']['goods_id']
         self.room_group_name = 'chat_%s' % self.room_name
         
@@ -252,7 +252,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        
+        print(self.room_name, self.room_group_name )
         # 127.0.0.1:8000 포트에서 로그인 하는거 아님 의미 없음
         if self.scope.get('user').is_authenticated:
           print("유저 받기 성공")
@@ -294,6 +294,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         
         user = await self.get_user_obj(user_id)
         goods = await self.get_goods_obj(goods_id)
+        print(goods)
         # trade_room_id = goods.trade_room_id
         trade_room_id = goods["trade_room"]
 
@@ -313,12 +314,12 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         }
         
         goods_data = {
-          "buyer": goods["buyer"],
-          "seller": goods["seller"]
+          "buyer": goods["buyer"]["username"],
+          "seller": goods["seller"]["username"]
         }
         
         # print("response: ",response)
-        # print(goods["buyer"],goods["seller"],response["sender_name"])
+        print(goods["buyer"]["username"],goods["seller"]["username"],response["sender_name"])
 
         if response["sender_name"] == goods_data['buyer'] or response["sender_name"] == goods_data['seller']:
           await self.create_trade_message_obj(user_id, message, trade_room_id)
@@ -371,7 +372,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       try:
         obj = Goods.objects.get(pk = goods_id)
-        serializer = GoodsSerializer(obj)
+        serializer = GoodsSerializer(obj, context={'action' : 'list'})
       except Goods.DoesNotExist:
         return False
       return serializer.data
