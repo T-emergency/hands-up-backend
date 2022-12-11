@@ -29,7 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
             "username": {"error_messages": {"required": "Give yourself a username"}}
         }
 
-
     def create(self, validated_data):
         user  = super().create(validated_data) # 저장하고
         password = user.password

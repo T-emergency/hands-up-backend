@@ -23,7 +23,6 @@ class GoodsSerializer(serializers.ModelSerializer):
     is_like = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
 
-
     def get_images(self, obj):
         if self.context["action"] == 'list':
             try:
