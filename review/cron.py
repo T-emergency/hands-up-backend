@@ -1,6 +1,5 @@
 from user.models import User
 import datetime
-from datetime import timedelta
 
 def cron_user_ban():
     """
@@ -12,12 +11,13 @@ def cron_user_ban():
         i.save()
 
 
-def react_user():
+def prison_break():
     """
-    매일새벽 오늘 정지 해제되는 회원 active 기능
+    매일자정 정지 해제되는 회원 active
     """
-    users = User.objects.filter(react_at=datetime.date.today()[:10])
+    users = User.objects.filter(react_at=str(datetime.date.today())[:10])
     for i in users:
         i.is_active = 1
+        i.rating_score = 40
         i.save()
 
