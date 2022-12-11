@@ -20,17 +20,11 @@ class GoodsSerializer(serializers.ModelSerializer):
 
     seller = UserSerializer(read_only = True)
     buyer = UserSerializer(read_only = True)
-    # is_like = serializers.SerializerMethodField()
-    # seller = serializers.SerializerMethodField()
-    # auction_room = serializers.SerializerMethodField()
+    is_like = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
-    # buyer = serializers.SerializerMethodField()
 
 
     def get_images(self, obj):
-        print(self._context)
-        # if self.context.get("action") == None:
-        #     return None
         if self.context["action"] == 'list':
             try:
                 return GoodsImageSerializer(obj.goodsimage_set.all()[0]).data
@@ -44,16 +38,6 @@ class GoodsSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         flag = user in obj.like.all()
         return flag
-    
-    def get_seller(self,obj):
-        return obj.seller.username
-        
-    def get_buyer(self,obj):
-        try:
-            username = self.buyer.username
-        except:
-            return None
-        return username
 
 
     def create(self, validated_data):
@@ -68,9 +52,3 @@ class GoodsSerializer(serializers.ModelSerializer):
         model = Goods
         fields = '__all__'
         read_only_fields = ['like', 'status']
-        
-    
-    # class Meta:
-    #     model = Goods
-    #     fields = '__all__'
-    #     read_only_fields = ('seller','buyer','trade_room','status','high_price','auction_room')

@@ -68,8 +68,6 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    # USERNAME_FIELD = 'username'
-    # REQUIRED_FIELDS = ['phone', ]
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['username',]
 

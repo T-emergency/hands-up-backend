@@ -12,14 +12,6 @@ from .serializers import TradeMessageSerializer
 # Create your views here.
 
 
-class ChatView(APIView):
-
-    def get(self, reqeust,goods_id):
-        layer = get_channel_layer()
-        print(dir(layer), layer)
-        async_to_sync(layer.group_send)(f'chat_{goods_id}', {'type': 'chat_message', 'response': json.dumps({'response_type': 'message', 'message': 'hi'})})
-        
-        return Response('연결 성공')
     
 class ChatRoomView(APIView):
     def get(self, request, goods_id):
