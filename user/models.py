@@ -68,6 +68,9 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    react_at = models.CharField(max_length=12,null=True, blank=True)
+
+
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['username',]
 
