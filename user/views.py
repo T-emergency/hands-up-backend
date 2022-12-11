@@ -8,6 +8,7 @@ from .serializers import CustomTokenObtainPairSerializer, UserSerializer,Profile
 from .models import User
 from goods.models import Goods
 
+# from goods.serializers import GoodsPostSerializer
 from goods.serializers import GoodsSerializer
 
 class UserView(APIView):
