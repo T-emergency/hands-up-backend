@@ -5,14 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from .serializers import CustomTokenObtainPairSerializer, UserSerializer
+from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer
 from .models import User
 from goods.models import Goods
 
-from goods.serializers import GoodsSerializer
-
-
-# from goods.serializers import GoodsPostSerializer
 from goods.serializers import GoodsSerializer
 
 class UserView(APIView):
@@ -22,16 +18,21 @@ class UserView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = JoinSerializer(data=request.data)
+        # if serializer.is_valid(raise_exception=True):
+        #     serializer.save()
+        #     return Response({'msg': '가입완료'}, status=status.HTTP_201_CREATED)
+        # else:
+        #     data = dict()
+        #     for key in serializer.errors.keys():
+        #         data[key] = f"이미 존재하는 {key} 또는 형식에 맞지 않습니다."
+        #     return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            # return Response({"msg" : f"{serializer.errors}"}, status = status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
-            return Response({'msg': '가입완료'}, status=status.HTTP_201_CREATED)
-        else:
-            data = dict()
-            for key in serializer.errors.keys():
-                data[key] = f"이미 존재하는 {key} 또는 형식에 맞지 않습니다."
-            # return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"msg" : f"{serializer.errors}"}, status = status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+        
 
     def put(self, request):
         user = User.objects.get(pk=request.user.id)
@@ -62,7 +63,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-
 # User profile
 class UserProfileView(APIView):
     def get(self, request, user_id):
@@ -85,6 +85,33 @@ class UserProfileView(APIView):
         print('-------data에 묶은 후')
 
         return Response(user_data)
+
+
+from .models import AuthSms
+class AuthSmsView(APIView):
+
+    def get(self, request):
+        try:
+            p_num = request.query_params['phone']
+            a_num = request.query_params['auth_number']
+        except KeyError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            result = AuthSms.check_auth_number(p_num=p_num, c_num=a_num)
+            return Response({'message':result}, status=status.HTTP_200_OK)
+
+
+    def post(self, request):
+        try:
+            p_num = request.data['phone']
+        except KeyError:
+            return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            AuthSms.objects.update_or_create(phone_number=p_num)
+            return Response({'message': 'OK'}, status=status.HTTP_200_OK)
+
+    
+
 
 class UserViewSet(viewsets.ViewSet):
 

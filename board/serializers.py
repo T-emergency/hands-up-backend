@@ -21,6 +21,10 @@ class ReportArticleCommentSerializer(serializers.ModelSerializer):
 
 
 class FreeListSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        return obj.author.username
     class Meta:
         model = FreeArticle
         fields = "__all__"
