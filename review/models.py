@@ -10,7 +10,7 @@ class Review(models.Model):
         db_table = 'Review'
         ordering = ['-created_at']
 
-    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_review')
     buyer = models.ForeignKey(User, on_delete = models.CASCADE)
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
     content = models.CharField(max_length=500, blank=False)

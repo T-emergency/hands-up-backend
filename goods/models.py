@@ -29,13 +29,11 @@ class Goods(models.Model):
     like = models.ManyToManyField(User, related_name='like_goods', blank=True)
 
 
-
 class GoodsImage(models.Model):
     class Meta:
         db_table = "GoodsImage"
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/')
-
 
 
 class BidPrice():

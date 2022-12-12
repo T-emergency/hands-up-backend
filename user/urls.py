@@ -10,8 +10,8 @@ from . import views
 urlpatterns = [
 
     #user profile
-    path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile'),
-
+    path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile_goods_view'),
+    path('<int:user_id>/profile/', views.UserProfileReviewView.as_view(), name='user_profile_view'),
     path('', UserView.as_view(), name='user_view'),
 
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain'),

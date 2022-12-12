@@ -4,9 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer
+from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer,UserProfileSerializer,userProfileReivewSerializer
 from .models import User
 from goods.models import Goods
+from review.models import Review
 
 from goods.serializers import GoodsPostSerializer
 
@@ -56,12 +57,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 
-# User profile
+# User profile goods list
 class UserProfileView(APIView):
     def get(self, request, user_id):
-
-        print(user_id)
-
         #판매내역
         sell_goods = Goods.objects.filter(seller_id = user_id)
         serialize_sell = GoodsPostSerializer(sell_goods, many=True)
@@ -71,12 +69,40 @@ class UserProfileView(APIView):
         #관심목록
         like_goods = Goods.objects.filter(like = user_id)
         serialize_like = GoodsPostSerializer(like_goods,many=True)
-        print(".........data에 묶기 전")
+
+        #user정보
+        user = User.objects.get(id = user_id)
+        serialize_user = UserProfileSerializer(user)
+        
+
         user_data = {
             "sell_goods":serialize_sell.data,
             "buy_goods":serialize_buy.data,
             "like_goods":serialize_like.data,
+            "user_data":serialize_user.data,
         }
-        print('-------data에 묶은 후')
+
 
         return Response(user_data)
+
+
+#user profile profile
+
+class UserProfileReviewView(APIView):
+    def get(self, request, user_id):
+        print('get함수 실행')
+        # user image와 name 가져오기
+        user = User.objects.get(id=user_id)
+        print(user)
+        user_evaluation = user.user_review_set.all()
+        print(user_evaluation)
+        serialize_review = userProfileReivewSerializer(user_evaluation, many=True)
+        serialize_user = UserProfileSerializer(user)
+
+        context = {
+            "review_user":serialize_review.data,
+            "user_data":serialize_user.data
+        }
+
+        return Response(context)
+        

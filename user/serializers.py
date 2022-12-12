@@ -5,6 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # model
 from user.models import User
 from goods.models import Goods
+from review.models import Review
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -40,4 +41,16 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goods
+        fields = "__all__"
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
+
+class userProfileReivewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
         fields = "__all__"

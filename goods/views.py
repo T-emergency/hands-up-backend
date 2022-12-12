@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from .serializers import GoodsPostSerializer,GoodsImageSerializer
+from .serializers import GoodsPostSerializer
 from .models import GoodsImage, Goods
 
 class GoodsPostView(APIView):
@@ -22,9 +22,8 @@ class GoodsPostView(APIView):
         "start_price":request.data.get('start_price'),
         }
 
-        print(data)
        
-        serialize_post = GoodsPostSerializer(data = data, context={'request':request}) #request받기
+        serialize_post = GoodsPostSerializer(data =data, context={'request':request}) #request받기
         # serialize_post = GoodsPostSerializer(data = data, context={'image_set':request.FILES.getlist('files')}) #request받기
         # 유효성 검사
         print('vaild 직전')
@@ -35,16 +34,6 @@ class GoodsPostView(APIView):
         return Response(serialize_post.errors)
 
     def get(self, request):
-        # image = GoodsImage.objects.get(id=1)
-        # post = Goods.objects.get(id = 8)
-
-        # post_data = GoodsPostSerializer(post)
-        # image_data = GoodsImageSerializer(image)
-
-        # data ={
-        #     "post":post_data.data,
-        #     "image":image_data.data
-        # }
         posts = Goods.objects.all()
         
         data = GoodsPostSerializer(posts, many=True).data
