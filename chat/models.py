@@ -18,6 +18,7 @@ class TradeMessage(models.Model):
     trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
     is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class AuctionChatRoom(models.Model):

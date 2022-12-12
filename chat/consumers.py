@@ -10,9 +10,13 @@ from channels.auth import get_user_model
 # models
 from goods.models import Goods
 from user.models import User
-from chat.models import AuctionParticipant
+from chat.models import AuctionParticipant, TradeMessage
+
+from chat.serializers import TradeMessageSerializer
+from goods.serializers import GoodsSerializer
 # 싹다 추가
 # 에러 준다. 그룹에서 특정 유저에게
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -175,9 +179,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         await self.send(text_data=event['response'])
 
-    # async def alert_message(self, event):
-    #     await self.send(text_data=event['response'])
-    
 
     async def get_time(self):
         now = datetime.now()
@@ -240,3 +241,161 @@ class ChatConsumer(AsyncWebsocketConsumer):
       else:
         participant.delete()
         return is_first, participants.count()
+
+
+class ChatConsumerDirect(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        print("connet 진입성공")
+        self.room_name = self.scope['url_route']['kwargs']['goods_id']
+        self.room_group_name = 'chat_%s' % self.room_name
+        
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        print(self.room_name, self.room_group_name )
+        # 127.0.0.1:8000 포트에서 로그인 하는거 아님 의미 없음
+        if self.scope.get('user').is_authenticated:
+          print("유저 받기 성공")
+          goods_id = self.scope['url_route']['kwargs']['goods_id']
+          user = self.scope.get('user')
+          self.alert_room_name = 'alert_%s' % user.id
+
+          # 해당 로그인 유저 그룹 생성 추가
+          await self.channel_layer.group_add(
+            self.alert_room_name,
+            self.channel_name
+          )
+          print(user, self.alert_room_name, self.channel_name)
+            
+        await self.accept()
+
+    async def disconnect(self, close_code):
+
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+        
+        # 127.0.0.1:8000 에서 로그인 안하면 의미 없음
+        if self.scope.get('user').is_authenticated:
+
+          await self.channel_layer.group_discard(
+            self.alert_room_name,
+            self.channel_name
+          )
+
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        goods_id = text_data_json.get('goods_id', '')
+        user_id = text_data_json.get('user_id', '')
+        
+        user = await self.get_user_obj(user_id)
+        goods = await self.get_goods_obj(goods_id)
+        print(goods)
+        # trade_room_id = goods.trade_room_id
+        trade_room_id = goods["trade_room"]
+
+        message = text_data_json['message']
+        
+        print("text_data: ",text_data)
+        print("goods_id: ",goods_id," user_id: ",user_id," message: ",message, "room_number ",trade_room_id)
+        
+        response = {
+          'response_type' : "message",
+          'message': message,
+          'sender': user.id,
+          'sender_image': user.profile_image.url,
+          'sender_name': user.username,
+          'goods_id': goods_id,
+          'time': await self.get_time(),
+        }
+        
+        goods_data = {
+          "buyer": goods["buyer"]["username"],
+          "seller": goods["seller"]["username"]
+        }
+        
+        # print("response: ",response)
+        print(goods["buyer"]["username"],goods["seller"]["username"],response["sender_name"])
+
+        if response["sender_name"] == goods_data['buyer'] or response["sender_name"] == goods_data['seller']:
+          await self.create_trade_message_obj(user_id, message, trade_room_id)
+        else:
+          await self.disconnect(0)
+          return False
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'response': json.dumps(response)
+
+            }
+      )
+
+
+    # Receive message from room group
+    async def chat_message(self, event):
+        await self.send(text_data=event['response'])
+
+    # async def alert_message(self, event):
+    #     await self.send(text_data=event['response'])
+    
+
+    async def get_time(self):
+        now = datetime.now()
+        am_pm = now.strftime('%p')      
+        now_time = now.strftime('%I:%M')
+
+        if am_pm == 'AM':
+          now_time = f"오전 {now_time}"
+        else:
+          now_time = f"오후 {now_time}"
+
+        return now_time
+          
+
+    @database_sync_to_async
+    def get_user_obj(self, user_id):
+
+      try:
+        obj = User.objects.get(pk = user_id)
+      except User.DoesNotExist:
+        return False
+      return obj
+
+    @database_sync_to_async
+    def get_goods_obj(self, goods_id):
+
+      try:
+        obj = Goods.objects.get(pk = goods_id)
+        serializer = GoodsSerializer(obj, context={'action' : 'list'})
+      except Goods.DoesNotExist:
+        return False
+      return serializer.data
+    
+    @database_sync_to_async
+    def get_trade_message_obj(self, trade_room_id):
+
+      try:
+        obj = TradeMessage.objects.filter(trade_room_id = trade_room_id)
+        serializer = TradeMessageSerializer(obj,many=True)
+      except TradeMessage.DoesNotExist:
+        return False
+      # return obj
+      return serializer.data
+    
+    @database_sync_to_async
+    def create_trade_message_obj(self, user_id, message, trade_room_id):
+
+      try:
+        obj = TradeMessage.objects.create(author_id=user_id, content=message, trade_room_id = trade_room_id)
+      except TradeMessage.DoesNotExist:
+        return False
+      return obj
+    

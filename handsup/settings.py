@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     # CORS provider
-    'corsheaders',
+    # 'corsheaders',
 
     # crontab
     'django_crontab',
@@ -54,9 +54,12 @@ INSTALLED_APPS = [
     
 
 ]
-WSGI_APPLICATION = 'handsup.wsgi.application'
+
 # Channels
+
 ASGI_APPLICATION = 'handsup.asgi.application'
+
+WSGI_APPLICATION = 'handsup.wsgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
@@ -69,17 +72,31 @@ CHANNEL_LAYERS = {
 
 # Channels
 # WSGI_APPLICATION = 'handsup.wsgi.application'
-
+# # Channels
 # ASGI_APPLICATION = 'handsup.asgi.application'
+
 # CHANNEL_LAYERS = {
 #     'default': {
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         # 'CONFIG': {
-#         #     "hosts": [('127.0.0.1', 6379)],
-#         # },
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
 #     },
 # }
+
+# Channels
+WSGI_APPLICATION = 'handsup.wsgi.application'
+
+ASGI_APPLICATION = 'handsup.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
+    },
+}
 
 
 MIDDLEWARE = [
@@ -228,7 +245,8 @@ SIMPLE_JWT = {
 CRONJOBS = [
     # 매주 월요일 새벽 1시 비매너 유저 제재
     ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
-
+    # 매일 자정 비매너 유저 제재 풀기
+    ('0 0 * * *', 'review.cron.react_user', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
     # 매분
     ('* * * * *', 'goods.cron.get_goods_status', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
     ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
