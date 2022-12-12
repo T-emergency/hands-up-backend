@@ -5,6 +5,17 @@ from django.contrib.auth.models import (
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
+from random import randint
+import hashlib
+import hmac
+import base64
+import requests
+import time
+import json
+import datetime
+from django.utils import timezone
+
+
 
 class UserManager(BaseUserManager):
     def create_user(self, phone, username, password=None):
