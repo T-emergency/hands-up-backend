@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # django
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
 
     # CORS provider
     'corsheaders',
