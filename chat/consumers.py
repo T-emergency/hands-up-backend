@@ -8,7 +8,7 @@ from channels.db import database_sync_to_async
 from channels.auth import get_user_model
 
 # models
-from goods.models import Goods, BidPrice
+from goods.models import Goods
 from user.models import User
 from chat.models import AuctionParticipant, TradeMessage
 

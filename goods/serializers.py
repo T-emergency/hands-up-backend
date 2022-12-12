@@ -42,15 +42,15 @@ class GoodsSerializer(serializers.ModelSerializer):
         flag = user in obj.like.all()
         return flag
     
-    def get_seller(self,obj):
-        return obj.seller.username
+    # def get_seller(self,obj):
+    #     return obj.seller.username
         
-    def get_buyer(self,obj):
-        try:
-            username = self.buyer.username
-        except:
-            return None
-        return username
+    # def get_buyer(self,obj):
+    #     try:
+    #         username = self.buyer.username
+    #     except:
+    #         return None
+    #     return username
 
 
     def create(self, validated_data):
