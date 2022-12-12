@@ -1,3 +1,8 @@
+from django.urls import path
+from . import views
+
+
 urlpatterns = [
-    # path('/', FreeListView.as_view(), name='free_list_view')
+    path('<int:goods_id>/', views.ReviewAPIView.as_view(), name='review'),
+    path('list/<int:user_id>/', views.UserInfoAPIView.as_view(), name='review_list'),
 ]

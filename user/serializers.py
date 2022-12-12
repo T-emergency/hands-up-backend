@@ -24,12 +24,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password','profile_image']
+        fields = '__all__'#['username', 'password','profile_image']
         extra_kwargs = {
             'password': {'write_only': True},
             "username": {"error_messages": {"required": "Give yourself a username"}}
         }
-
 
     def create(self, validated_data):
         user  = super().create(validated_data) # 저장하고
@@ -50,7 +49,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class userProfileReivewSerializer(serializers.ModelSerializer):
+# class userProfileReivewSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Review
+#         fields = "__all__"
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    # TODO 판매상품 4개
+    author = serializers.SerializerMethodField()
+    receiver = serializers.SerializerMethodField()
+    created_at= serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        return obj.author.username
+
+    def get_receiver(self, obj):
+        return obj.receiver.username
+    
+    def get_created_at(self,obj):
+        return str(obj.created_at)[:19]
     class Meta:
         model = Review
-        fields = "__all__"
+        fields = '__all__'
