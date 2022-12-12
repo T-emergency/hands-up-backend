@@ -1,11 +1,31 @@
 from rest_framework import serializers
-from .models import FreeArticle 
+from .models import ReportArticle,ReportArticleComment,FreeArticle
+from user.models import User
+
+class ReportArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportArticle
+        fields = '__all__'
+        read_only_fields=("author",)
+
+
+
+
+class ReportArticleCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportArticleComment
+        fields = '__all__'
+        read_only_fields=("author",)
+
+
 
 
 class FreeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreeArticle
         fields = "__all__"
+
+
 
 
 class FreeCreateSerializer(serializers.ModelSerializer):
@@ -25,10 +45,14 @@ class FreeCreateSerializer(serializers.ModelSerializer):
                         }
 
 
+
+
 class FreeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreeArticle
         fields = "__all__"
+
+
 
 
 class FreeCommentSerializer(serializers.ModelSerializer):

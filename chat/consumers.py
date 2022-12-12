@@ -8,7 +8,7 @@ from channels.db import database_sync_to_async
 from channels.auth import get_user_model
 
 # models
-from goods.models import Goods, BidPrice
+from goods.models import Goods
 from user.models import User
 from chat.models import AuctionParticipant
 # 싹다 추가
@@ -18,13 +18,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['goods_id']
-        self.room_group_name = 'chat_%s' % self.room_name
+        self.room_group_name = 'auction_%s' % self.room_name
         
 
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
+
 
         if self.scope.get('user').is_authenticated:
 

@@ -33,9 +33,10 @@ INSTALLED_APPS = [
     # service app
     'user',
     'review',
-    'board',
-    'goods',
     'chat',
+    'board',
+    # 'auction',
+    'goods',
 
     # django
     'rest_framework',
