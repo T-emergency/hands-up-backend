@@ -36,12 +36,19 @@ class GoodsView(ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly,]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
-    filterset_fields = ["category", 'status']
+    filterset_fields = ["category"]
     search_fields = ['title','content']
     pagination_class = GoodsPagination
 
 
-    
+    def get_queryset(self):
+        status = {'null':None, 'true':True, 'false' : False}
+        st = self.request.query_params.get('status', '')
+        if st == '':
+            queryset = Goods.objects.all().prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        else:
+            queryset = Goods.objects.filter(status=status[st]).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        return queryset
 
     def get_permissions(self):
         if self.action == 'create':
