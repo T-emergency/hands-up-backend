@@ -1,7 +1,7 @@
 from django.db import models
 # models
 from user.models import User
-from chat.models import TradeChatRoom, AuctionChatRoom
+from chat.models import TradeChatRoom
 
 # validators
 from django.core.validators import validate_image_file_extension
@@ -14,7 +14,7 @@ class Goods(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sell_goods")
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buy_goods", null=True)
     trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE, null=True, blank=True)
-    auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE, null=True, blank=True)
+    # auction_room = models.ForeignKey(AuctionChatRoom, on_delete=models.CASCADE, null=True, blank=True)
 
     title = models.CharField(max_length=256)
     content = models.TextField()

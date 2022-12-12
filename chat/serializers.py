@@ -1,14 +1,13 @@
 from rest_framework import serializers
 from .models import TradeMessage
+from user.serializers import UserSerializer
 
 
 
 
 class TradeMessageSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
     
-    def get_author(self, obj):
-        return obj.author.username
+    author = UserSerializer()
     
     class Meta:
         model = TradeMessage

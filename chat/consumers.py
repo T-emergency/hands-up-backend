@@ -247,6 +247,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 class ChatConsumerDirect(AsyncWebsocketConsumer):
 
     async def connect(self):
+
+      user = self.scope.get('user')
+      goods_id = self.scope['url_route']['kwargs']['goods_id']
+      goods = await self.get_goods_obj(goods_id)
+      buyer = goods.buyer_id
+      seller = goods.seller_id
+
+      if user.is_authenticated and (user.id == buyer or user.id == seller):
         self.room_name = self.scope['url_route']['kwargs']['goods_id']
         self.room_group_name = 'chat_%s' % self.room_name
         
@@ -254,21 +262,13 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
-        if self.scope.get('user').is_authenticated:
-          goods_id = self.scope['url_route']['kwargs']['goods_id']
-          user = self.scope.get('user')
-          self.alert_room_name = 'alert_%s' % user.id
-
-          # 해당 로그인 유저 그룹 생성 추가
-          await self.channel_layer.group_add(
-            self.alert_room_name,
-            self.channel_name
-          )
-            
+          
         await self.accept()
+      else:
+        await self.disconnect()
 
-    async def disconnect(self, close_code):
+
+    async def disconnect(self):
 
         # Leave room group
         await self.channel_layer.group_discard(
@@ -287,15 +287,16 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
+
         text_data_json = json.loads(text_data)
         goods_id = text_data_json.get('goods_id', '')
         user_id = text_data_json.get('user_id', '')
         
         user = await self.get_user_obj(user_id)
         goods = await self.get_goods_obj(goods_id)
-
-        # trade_room_id = goods.trade_room_id
-        trade_room_id = goods["trade_room"]
+        print(goods)
+        trade_room_id = goods.trade_room_id
+        # trade_room_id = goods["trade_room"]
 
         message = text_data_json['message']
         
@@ -308,20 +309,14 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
           'sender_name': user.username,
           'goods_id': goods_id,
           'time': await self.get_time(),
-        }
-        
-        goods_data = {
-          "buyer": goods["buyer"]["username"],
-          "seller": goods["seller"]["username"]
-        }
-        
-        # print("response: ",response)
-        print(goods["buyer"]["username"],goods["seller"]["username"],response["sender_name"])
+        }        
 
-        if response["sender_name"] == goods_data['buyer'] or response["sender_name"] == goods_data['seller']:
+        if response["sender"] == goods.buyer_id or response["sender"] == goods.seller_id:
+
           await self.create_trade_message_obj(user_id, message, trade_room_id)
+
         else:
-          await self.disconnect(0)
+          await self.disconnect()
           return False
         # Send message to room group
         await self.channel_layer.group_send(
@@ -363,17 +358,17 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       return obj
 
+
     @database_sync_to_async
     def get_goods_obj(self, goods_id):
 
       try:
         obj = Goods.objects.get(pk = goods_id)
-        serializer = GoodsSerializer(obj, context={'action' : 'list'})
       except Goods.DoesNotExist:
         return False
-
-      return serializer.data
+      return obj
     
+
     @database_sync_to_async
     def get_trade_message_obj(self, trade_room_id):
 
@@ -381,6 +376,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
       serializer = TradeMessageSerializer(obj,many=True)
 
       return serializer.data
+    
     
     @database_sync_to_async
     def create_trade_message_obj(self, user_id, message, trade_room_id):
