@@ -74,12 +74,35 @@ class GoodsView(ModelViewSet):
 class UserGoodsView(ModelViewSet):
     serializer_class = GoodsSerializer
     permission_classes = [IsAuthorOrReadOnly,]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+
+    filterset_fields = ["category"]
+    search_fields = ['title','content']
+    pagination_class = GoodsPagination
     lookup_field='user_id'
+
+
+    def get_queryset(self):
+        status = {'null':None, 'true':True, 'false' : False}
+        st = self.request.query_params.get('status', '')
+
+        if st == '':
+            queryset = Goods.objects.all().prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
+            print(queryset)
+            print("위",self.kwargs['user_id'])
+
+        else:
+            queryset = Goods.objects.filter(status=status[st], seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+            print(queryset)
+            print("아래",self.kwargs['user_id'])
+        return queryset
+
 
     def get_permissions(self):
         if self.action == 'create':
-            return [permissions.IsAuthenticated(),]
+            return [permissions.IsAuthenticated(),] # ()를 붙이는 이유는 super의 get_permissions를 보면 알 수 있다.
         return super(UserGoodsView, self).get_permissions()
+
 
     def get_serializer_context(self):
         return {
@@ -89,11 +112,32 @@ class UserGoodsView(ModelViewSet):
             'action' : self.action
         }
 
-    def get_queryset(self):
-        return Goods.objects.prefetch_related('like','goodsimage_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
+
+    # serializer_class = GoodsSerializer
+    # permission_classes = [IsAuthorOrReadOnly,]
+    # lookup_field='user_id'
+
+    # def get_permissions(self):
+    #     if self.action == 'create':
+    #         return [permissions.IsAuthenticated(),]
+    #     return super(UserGoodsView, self).get_permissions()
+
+    # def get_serializer_context(self):
+    #     return {
+    #         'request': self.request,
+    #         'format': self.format_kwarg,
+    #         'view': self,
+    #         'action' : self.action
+    #     }
+
+    # def get_queryset(self):
+    #     return Goods.objects.prefetch_related('like','goodsimage_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
+
+    # def perform_create(self, serializer):
+    #     serializer.save(seller_id = self.request.user.id)
 
 
 class GoodsLike(APIView):
