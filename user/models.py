@@ -5,6 +5,17 @@ from django.contrib.auth.models import (
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
+from random import randint
+import hashlib
+import hmac
+import base64
+import requests
+import time
+import json
+import datetime
+from django.utils import timezone
+
+
 
 class UserManager(BaseUserManager):
     def create_user(self, phone, username, password=None):
@@ -92,3 +103,70 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+
+
+
+
+class AuthSms(models.Model):
+    phone_number = models.CharField(verbose_name='휴대폰 번호', primary_key=True, max_length=11)
+    auth_number = models.IntegerField(verbose_name='인증 번호')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        db_table = 'AuthSms'
+
+    def save(self, *args, **kwargs):
+        self.auth_number = randint(100000, 1000000)
+        super().save(*args, **kwargs)
+        self.send_sms()  # 인증번호가 담긴 SMS를 전송
+
+    def send_sms(self):
+
+        url = 'https://sens.apigw.ntruss.com/sms/v2/services//messages'
+        data = {
+            "type": "SMS",
+            "contentType" : "COMM",
+            "from": "",
+            "messages":[{"to":self.phone_number, "subject" : "제목입니다"}],
+            "content": "[핸즈업] 본인 확인 인증 번호 [{}]를 입력해주세요.".format(self.auth_number)
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "x-ncp-apigw-timestamp" : str(int(time.time() * 1000)),
+            "x-ncp-iam-access-key": 'x4pbA8ajyhwvapD1pzmg',
+            "x-ncp-apigw-signature-v2": self.make_signature(),
+        }
+        requests.post(url, data=json.dumps(data), headers=headers)
+
+
+    def	make_signature(self):
+        timestamp = int(time.time() * 1000)
+        timestamp = str(timestamp)
+
+        access_key = ""				# access key id (from portal or Sub Account)
+        secret_key = ""				# secret key (from portal or Sub Account)
+        secret_key = bytes(secret_key, 'UTF-8')
+
+        method = "POST"
+        URI = ''
+        # URI = "/photos/puppy.jpg?query1=&query2"
+
+        message = method + " " + URI + "\n" + timestamp + "\n" + access_key
+        message = bytes(message, 'UTF-8')
+        signingKey = base64.b64encode(hmac.new(secret_key, message, digestmod=hashlib.sha256).digest())
+        return signingKey
+
+    @classmethod
+    def check_auth_number(cls, p_num, c_num):
+        time_limit = timezone.now() - datetime.timedelta(minutes=5)
+        result = cls.objects.filter(
+            phone_number=p_num,
+            auth_number=c_num,
+            updated_at__gte=time_limit
+        )
+        if result:
+            return True
+        return False

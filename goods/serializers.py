@@ -22,6 +22,7 @@ class GoodsSerializer(serializers.ModelSerializer):
     buyer = UserSerializer(read_only = True)
     is_like = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    participants_count = serializers.SerializerMethodField()
 
     def get_images(self, obj):
         if self.context["action"] == 'list':
@@ -38,6 +39,11 @@ class GoodsSerializer(serializers.ModelSerializer):
         flag = user in obj.like.all()
         return flag
 
+    def get_participants_count(self, obj):
+        if self.context["action"] == 'list':
+            return obj.auctionparticipant_set.count()
+        else:
+            return 0
 
     def create(self, validated_data):
         instance = super().create(validated_data)

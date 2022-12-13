@@ -45,7 +45,6 @@ class ReviewAPIView(APIView):
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
-                    print('여기로 오나?')
                     return Response(serializer.data, status=status.HTTP_200_OK)
                 else:
                     try:
