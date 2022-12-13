@@ -41,6 +41,8 @@ class UserView(APIView):
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            print(user)
+            print(serializer.data)
             return Response({'msg': '저장완료'}, status=status.HTTP_200_OK)
         else:
             data = dict()
