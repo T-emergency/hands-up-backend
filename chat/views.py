@@ -9,6 +9,8 @@ import json
 from goods.models import Goods
 from .models import TradeMessage
 from .serializers import TradeMessageSerializer
+from user.models import User
+from goods.serializers import GoodsSerializer
 # Create your views here.
 
 
@@ -38,3 +40,25 @@ class ChatRoomView(APIView):
             
         else:
             return Response({'message': "접근 권한이 없습니다"})
+
+
+class ChatRoomList(APIView):
+    def get(self, request):
+        user = request.user
+        buy_goods = user.buy_goods.filter(trade_room__isnull=False)
+        sell_goods = user.sell_goods.filter(trade_room__isnull=False)
+
+        context = {
+            "request": request,
+            "action": "list"
+        }
+
+        buyer = GoodsSerializer(buy_goods, many=True, context=context)
+        seller = GoodsSerializer(sell_goods, many=True, context=context)
+
+        goods_list ={
+            "room_list":buyer.data + seller.data,
+        }
+        
+        
+        return Response(goods_list)
