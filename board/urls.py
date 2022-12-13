@@ -9,7 +9,7 @@ urlpatterns = [
     path('detail/<int:free_article_id>/', views.FreeDetailView.as_view(), name='free_detail_view'),
     #자유게시판 댓글 url
     path('free_articles/<int:free_article_id>/comment/', views.FreeCommentView.as_view(), name='free_comment'),
-    path('free_articles/<int:free_article_id>/comment/<int:free_article_comment_id>/', views.FreeCommentView.as_view(), name='free_comment_detail'),
+    path('free_articles/<int:free_article_id>/comment/<int:free_comment_id>/', views.FreeCommentView.as_view(), name='free_comment_detail'),
     #제보게시판 게시글 url
     path('report_articles/', views.ReportListArticleView.as_view(), name='report_articles_list'),
     path('report_articles/<int:report_article_id>/', views.ReportArticleDetailView.as_view(), name='report_article_detail'),

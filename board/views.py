@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from user.models import User
 from .models import ReportArticle,ReportArticleComment,FreeArticle, FreeArticleComment
+from rest_framework.pagination import PageNumberPagination
 
 from .serializers import (
     ReportArticleSerializer,
@@ -99,12 +100,13 @@ class ReportCommentAPIView(APIView):
 
 
 #자유게시판 전체 리스트
-class FreeListView(APIView):
+class FreeListView(APIView, PageNumberPagination):
+    page_size = 12
     def get(self, request):
         freearticle = FreeArticle.objects.all()
-        serializer = FreeListSerializer(freearticle, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
+        results = self.paginate_queryset(freearticle, request, view=self)
+        serializer = FreeListSerializer(results, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 #자유게시판 등록
@@ -122,16 +124,20 @@ class FreeCreateView(APIView):
 class FreeDetailView(APIView):
     def get(self, request, free_article_id):
         free_article = get_object_or_404(FreeArticle, id=free_article_id)
-        if request.user == free_article.author:
-            serializer = FreeDetailSerializer(free_article)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"message":"접근 권한 없음"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            free_article.hits = free_article.hits+1
+            free_article.save()
+        except:
+            pass
+        serializer = FreeDetailSerializer(free_article)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 #자유게시판 수정
     def put(self, request, free_article_id):        
         free_article = get_object_or_404(FreeArticle, id=free_article_id)
         if request.user == free_article.author:
-            serializer = FreeCreateSerializer(free_article, data=request.data, partial=True)
+            serializer = FreeDetailSerializer(free_article, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -149,18 +155,19 @@ class FreeDetailView(APIView):
 
 
 #자유게시판 댓글 조회
-class FreeCommentView(APIView):
+class FreeCommentView(APIView, PageNumberPagination):
+    page_size=5
     def get(self, request, free_article_id):
-        freearticle = get_object_or_404(FreeArticle, id=free_article_id)
-        comments = freearticle.comment.all()
-        serializer = FreeCommentSerializer(comments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        free_article_comment = FreeArticleComment.objects.filter(article=free_article_id)
+        results = self.paginate_queryset(free_article_comment, request, view=self)
+        serializer = FreeCommentSerializer(results, many=True)
+        return self.get_paginated_response(serializer.data)
 
 #자유게시판 댓글 작성
     def post(self, request, free_article_id):
         serializer = FreeCommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, free_article_id=free_article_id)
+            serializer.save(author=request.user, article_id=free_article_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -168,10 +175,10 @@ class FreeCommentView(APIView):
 
     def put(self, request, free_article_id, free_comment_id):
         comment = get_object_or_404(FreeArticleComment, article_id=free_article_id, id=free_comment_id)
-        if request.user == comment.user:
+        if request.user == comment.author:
             serializer = FreeCommentSerializer(comment, data=request.data)
             if serializer.is_valid():
-                serializer.save(user=request.user, free_article_id=free_article_id)
+                serializer.save(author=request.user, article_id=free_article_id)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message":"접근 권한 없음"}, status=status.HTTP_403_FORBIDDEN)
@@ -179,7 +186,7 @@ class FreeCommentView(APIView):
 #자유게시판 댓글 삭제
     def delete(self, request, free_article_id, free_comment_id):
         comment= get_object_or_404(FreeArticleComment, id=free_comment_id)
-        if request.user == comment.user:
+        if request.user == comment.author:
             comment.delete()
             return Response({"message":"댓글 삭제 완료"},status=status.HTTP_200_OK)
         return Response({"message":"접근 권한 없음"}, status=status.HTTP_403_FORBIDDEN)
