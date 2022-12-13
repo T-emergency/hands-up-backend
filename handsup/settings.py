@@ -57,6 +57,7 @@ WSGI_APPLICATION = 'handsup.wsgi.application'
 # Channels
 ASGI_APPLICATION = 'handsup.asgi.application'
 
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',

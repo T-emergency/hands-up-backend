@@ -6,6 +6,7 @@ from rest_framework import permissions
 from .models import Goods
 from user.models import User
 from .serializers import GoodsSerializer
+from rest_framework.pagination import PageNumberPagination
 
 class GoodsView(APIView):
 
@@ -23,7 +24,7 @@ class GoodsView(APIView):
             return Response(serializer.data)
         else:
             return Response({'message': serializer.errors})
-        
+        g
         
 class GoodsDetailView(APIView):
     def get(self, request, goods_id):
