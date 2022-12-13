@@ -156,7 +156,7 @@ class FreeDetailView(APIView):
 
 
 #자유게시판 댓글 조회
-class FreeCommentListView(APIView):
+class FreeCommentView(APIView):
     def get(self, request, free_article_id):
         freearticle = get_object_or_404(FreeArticle, id=free_article_id)
         comments = freearticle.comment.all()
@@ -171,14 +171,7 @@ class FreeCommentListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 #자유게시판 댓글 수정
-class FreeCommentDetailView(APIView):
-    def get(self, request, free_article_id, free_comment_id):
-        comment = get_object_or_404(FreeArticleComment, article_id=free_article_id, id=free_comment_id)
-        serializer = FreeCommentSerializer(comment)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, free_article_id, free_comment_id):
         comment = get_object_or_404(FreeArticleComment, article_id=free_article_id, id=free_comment_id)
