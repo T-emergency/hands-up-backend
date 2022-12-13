@@ -34,12 +34,14 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 
     def get_is_like(self, obj):
+        print(self.context)
         user = self.context['request'].user
         flag = user in obj.like.all()
         return flag
 
 
     def create(self, validated_data):
+        print(validated_data)
         instance = super().create(validated_data)
         image_set = self.context['request'].FILES.getlist('images')
         image_list = [GoodsImage(goods = instance, image = image) for image in image_set]

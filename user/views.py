@@ -61,25 +61,23 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 # User profile goods list
 class UserProfileView(APIView):
     def get(self, request, user_id):
+        data = {
+            "request" : request,
+            "action" : "list"
+        }
         #판매내역
         sell_goods = Goods.objects.filter(seller_id = user_id)
-        serialize_sell = GoodsSerializer(sell_goods, many=True)
+        serialize_sell = GoodsSerializer(sell_goods, many=True,context=data)
         #구매내역
         buy_goods = Goods.objects.filter(buyer_id = user_id)
-        serialize_buy = GoodsSerializer(buy_goods,many=True)
+        serialize_buy = GoodsSerializer(buy_goods,many=True, context=data)
         #관심목록
         like_goods = Goods.objects.filter(like = user_id)
-
-        serialize_like = GoodsPostSerializer(like_goods,many=True)
-
+        serialize_like = GoodsSerializer(like_goods,many=True,context=data)
         #user정보
         user = User.objects.get(id = user_id)
         serialize_user = UserProfileSerializer(user)
-        
-
-
-        serialize_like = GoodsSerializer(like_goods,many=True)
-        print(".........data에 묶기 전")
+        serialize_like = GoodsSerializer(like_goods,many=True,context=data)
 
         user_data = {
             "sell_goods":serialize_sell.data,
@@ -87,30 +85,8 @@ class UserProfileView(APIView):
             "like_goods":serialize_like.data,
             "user_data":serialize_user.data,
         }
-
-
         return Response(user_data)
 
-
-#user profile profile
-
-# class UserProfileReviewView(APIView):
-#     def get(self, request, user_id):
-#         print('get함수 실행')
-#         # user image와 name 가져오기
-#         user = User.objects.get(id=user_id)
-#         print(user)
-#         user_evaluation = user.user_review_set.all()
-#         print(user_evaluation)
-#         serialize_review = userProfileReivewSerializer(user_evaluation, many=True)
-#         serialize_user = UserProfileSerializer(user)
-
-#         context = {
-#             "review_user":serialize_review.data,
-#             "user_data":serialize_user.data
-#         }
-
-#         return Response(context)
 
 class UserProfileReviewView(APIView):
     def get(self, request, user_id):

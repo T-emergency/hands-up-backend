@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import permissions
-from .serializers import GoodsPostSerializer
+
 from .models import GoodsImage, Goods
 
 from rest_framework.views import APIView
@@ -38,6 +38,7 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
+        print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,
@@ -45,8 +46,6 @@ class GoodsView(ModelViewSet):
             'action' : self.action
         }
 
-
-       
         # serialize_post = GoodsPostSerializer(data =data, context={'request':request}) #request받기
         # # serialize_post = GoodsPostSerializer(data = data, context={'image_set':request.FILES.getlist('files')}) #request받기
         # # 유효성 검사
