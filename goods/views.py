@@ -1,4 +1,8 @@
 from rest_framework.response import Response
+from rest_framework import permissions
+
+from .models import GoodsImage, Goods
+
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
@@ -59,12 +63,26 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
+        print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,
             'view': self,
             'action' : self.action
         }
+
+        # serialize_post = GoodsPostSerializer(data =data, context={'request':request}) #request받기
+        # # serialize_post = GoodsPostSerializer(data = data, context={'image_set':request.FILES.getlist('files')}) #request받기
+        # # 유효성 검사
+        # print('vaild 직전')
+        # if serialize_post.is_valid():
+        #     serialize_post.save(seller = user)
+        #     return Response(serialize_post.data)
+        # print(serialize_post.errors)
+        # return Response(serialize_post.errors)
+
+    def get(self, request):
+        posts = Goods.objects.all()
 
 
     def perform_create(self, serializer):
@@ -142,6 +160,7 @@ class GoodsLike(APIView):
     
 #     def post(self, request):
 #         serializer = GoodsSerializer(data=request.data, context={'request':request})
+
         
 #         if serializer.is_valid():
 #             serializer.save(seller=request.user)

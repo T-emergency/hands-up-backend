@@ -29,10 +29,10 @@ class Goods(models.Model):
     like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
 
 
-
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension])
+
 
     class Meta:
         db_table = "GoodsImage"
