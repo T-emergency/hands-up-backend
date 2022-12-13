@@ -5,11 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-<<<<<<< HEAD
-from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer
-=======
 from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer,UserProfileSerializer,ReviewListSerializer
->>>>>>> origin/pr/56
 from .models import User
 from goods.models import Goods
 from review.models import Review
