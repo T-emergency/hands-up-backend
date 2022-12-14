@@ -86,7 +86,6 @@ class ReviewAPIView(APIView):
 
 
 
-
 class UserInfoAPIView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     def get(self, request, user_id):
@@ -94,6 +93,7 @@ class UserInfoAPIView(APIView):
         """
         판매자 정보에 들어갔을때 후기모음
         """
+        # TODO 쿼리 수 줄이기
         review_list=Review.objects.filter(receiver_id=user_id)
         review_list_order_by = review_list.order_by('-created_at')
         serializer=ReviewListSerializer(review_list_order_by, many=True)

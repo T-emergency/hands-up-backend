@@ -91,6 +91,8 @@ class UserGoodsView(ModelViewSet):
     serializer_class = GoodsSerializer
     permission_classes = [IsAuthorOrReadOnly,]
     lookup_field='user_id'
+    pagination_class = GoodsPagination
+
 
     def get_permissions(self):
         if self.action == 'create':
@@ -106,7 +108,13 @@ class UserGoodsView(ModelViewSet):
         }
 
     def get_queryset(self):
-        return Goods.objects.prefetch_related('like','goodsimage_set',).select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
+        status = {'null':None, 'true':True, 'false' : False}
+        st = self.request.query_params.get('status', '')
+        if st == '':
+            queryset = Goods.objects.filter(seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        else:
+            queryset = Goods.objects.filter(seller_id=self.kwargs['user_id'], status=status[st]).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
