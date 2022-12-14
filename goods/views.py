@@ -1,3 +1,5 @@
+from django.db.models import Count, Sum, F, Q
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import permissions
 
@@ -11,7 +13,7 @@ from rest_framework import status, permissions
 
 from .models import Goods
 from user.models import User
-from .serializers import GoodsSerializer
+from .serializers import GoodsListSerializer, GoodsSerializer
 
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -71,22 +73,18 @@ class GoodsView(ModelViewSet):
             'action' : self.action
         }
 
-        # serialize_post = GoodsPostSerializer(data =data, context={'request':request}) #request받기
-        # # serialize_post = GoodsPostSerializer(data = data, context={'image_set':request.FILES.getlist('files')}) #request받기
-        # # 유효성 검사
-        # print('vaild 직전')
-        # if serialize_post.is_valid():
-        #     serialize_post.save(seller = user)
-        #     return Response(serialize_post.data)
-        # print(serialize_post.errors)
-        # return Response(serialize_post.errors)
-
-    def get(self, request):
-        posts = Goods.objects.all()
-
-
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
+
+
+    @action(detail=False, methods=['GET'])
+    def recommend_goods(self, request):
+
+        q = Q(status = True) | Q(status = None)
+        recommend_goods = self.get_queryset().filter(q).annotate(participants_count = Count('auctionparticipant')).order_by('-participants_count')[:10]
+        serializer = GoodsListSerializer(recommend_goods, many = True, context = self.get_serializer_context())
+
+        return Response(data = serializer.data, status=status.HTTP_200_OK)
 
 
 class UserGoodsView(ModelViewSet):
@@ -108,7 +106,7 @@ class UserGoodsView(ModelViewSet):
         }
 
     def get_queryset(self):
-        return Goods.objects.prefetch_related('like','goodsimage_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
+        return Goods.objects.prefetch_related('like','goodsimage_set',).select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
