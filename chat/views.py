@@ -79,10 +79,10 @@ class ChatMessageChek(APIView):
     
 class ChatMessageWaitCount(APIView):
     def get(self, request, goods_id):
-        print("진입",goods_id)
+
         goods = get_object_or_404(Goods, id=goods_id)
         messages = TradeMessage.objects.filter(trade_room_id=goods.trade_room_id, is_read=0)
-        print(len(messages))
+
         serializer = TradeMessageSerializer(messages,many=True)
         
         return Response(serializer.data)
