@@ -24,12 +24,10 @@ class ReviewAPIView(APIView):
         """
         판매글에서 대화창에 들어왔을때 로컬스토리지, 쿼리파라미터로 받음
         """
-
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
         score=(request.data.get('score'))
-        print(score)
         if review_exist==True:
             """
             리뷰 1회 제한
