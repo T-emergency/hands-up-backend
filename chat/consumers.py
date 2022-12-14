@@ -323,6 +323,8 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
           # await self.disconnect()
           return False
         # Send message to room group
+        
+        print("기록 확인",user.id)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -389,3 +391,9 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       return obj
     
+    @database_sync_to_async
+    def check_trade_message_obj(self, user_id, trade_room_id):
+
+      obj = TradeMessage.objects.filter(author_id=user_id, trade_room_id = trade_room_id)
+
+      return obj

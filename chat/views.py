@@ -9,8 +9,8 @@ import json
 from goods.models import Goods
 from .models import TradeMessage
 from .serializers import TradeMessageSerializer
-from user.models import User
 from goods.serializers import GoodsSerializer
+from django.db.models import Q
 # Create your views here.
 
 
@@ -45,20 +45,44 @@ class ChatRoomView(APIView):
 class ChatRoomList(APIView):
     def get(self, request):
         user = request.user
-        buy_goods = user.buy_goods.filter(trade_room__isnull=False)
-        sell_goods = user.sell_goods.filter(trade_room__isnull=False)
+        goods = Goods.objects.filter(Q(buyer_id=user.id)|Q(seller_id=user.id) &Q(trade_room__isnull=False))
 
         context = {
             "request": request,
             "action": "list"
         }
-
-        buyer = GoodsSerializer(buy_goods, many=True, context=context)
-        seller = GoodsSerializer(sell_goods, many=True, context=context)
-
-        goods_list ={
-            "room_list":buyer.data + seller.data,
-        }
+        serializer = GoodsSerializer(goods,many=True, context=context)
         
+        return Response(serializer.data)
+    
+
+
+class ChatMessageChek(APIView):
+    
+    # def get(self, request, goods_id,user_id):
+    #     messages = 
+    #     serializer = TradeMessageSerializer()
+    
+    def post(self, request, goods_id,user_id):
         
-        return Response(goods_list)
+        if user_id == None:
+            return Response("읽을 메세지가 없습니다")
+        
+        goods = Goods.objects.get(id=goods_id)
+        message_list = TradeMessage.objects.filter(author_id=user_id, trade_room_id=goods.trade_room_id)
+        
+        for message in message_list:
+            message.is_read = request.data["is_read"]
+            message.save()
+        return Response("메세지 읽기 성공")
+    
+    
+class ChatMessageWaitCount(APIView):
+    def get(self, request, goods_id):
+        print("진입",goods_id)
+        goods = get_object_or_404(Goods, id=goods_id)
+        messages = TradeMessage.objects.filter(trade_room_id=goods.trade_room_id, is_read=0)
+        print(len(messages))
+        serializer = TradeMessageSerializer(messages,many=True)
+        
+        return Response(serializer.data)
