@@ -33,7 +33,7 @@ class ReportArticle(models.Model):
 
     class Meta:
         db_table = 'ReportArticle'
-        ordering = ['id']
+        ordering = ['-id']
 
     def __str__(self):
         return str(self.title)

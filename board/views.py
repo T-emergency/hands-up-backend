@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 from user.models import User
 from .models import ReportArticle,ReportArticleComment,FreeArticle, FreeArticleComment
 from rest_framework.pagination import PageNumberPagination
-
 from .serializers import (
     ReportArticleSerializer,
     ReportArticleCommentSerializer, 
@@ -17,18 +16,22 @@ from .serializers import (
 )
 
 
-class ReportListArticleView(APIView):
-
+class ReportListArticleView(APIView,PageNumberPagination):
+    page_size=12
     def get(self,request):
         articles = ReportArticle.objects.all()
-        serializer = ReportArticleSerializer(articles,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        print(articles)
+        results = self.paginate_queryset(articles, request, view=self)
+        serializer = ReportArticleSerializer(results,many=True)
+        return self.get_paginated_response(serializer.data)
 
     def post(self,request):
         serializer = ReportArticleSerializer(data=request.data)
+        print(request.data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save(author=request.user)
-            return Response({"message":'succees',"data":serializer.data},status=status.HTTP_201_CREATED)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
         else:
             return Response('faild',status=status.HTTP_400_BAD_REQUEST)
 
@@ -39,7 +42,7 @@ class ReportArticleDetailView(APIView):
     def get(self,request,report_article_id):
         article=get_object_or_404(ReportArticle,id=report_article_id)
         serializer = ReportArticleSerializer(article)
-        return Response({'get succees':serializer.data},status=status.HTTP_200_OK)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     def put(self,request,report_article_id):
         article=get_object_or_404(ReportArticle,id=report_article_id)
@@ -47,7 +50,7 @@ class ReportArticleDetailView(APIView):
         if request.user==article.author:
             if serializer.is_valid():
                 serializer.save(author=request.user)
-                return Response({'put succees':serializer.data},status=status.HTTP_200_OK)
+                return Response(serializer.data,status=status.HTTP_200_OK)
             else:
                 return Response({"Message": serializer.errors})
         else:        
@@ -63,21 +66,24 @@ class ReportArticleDetailView(APIView):
 
 
 
-class ReportCommentAPIView(APIView):
+class ReportCommentAPIView(APIView,PageNumberPagination):
+    page_size=5
     def get(self,request,report_article_id):
-        comment=ReportArticleComment.objects.all()
-        serializer=ReportArticleCommentSerializer(comment, many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        comment=ReportArticleComment.objects.filter(article=report_article_id)
+        results = self.paginate_queryset(comment, request, view=self)
+        serializer=ReportArticleCommentSerializer(results, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def post(self,request,report_article_id):
-        article=get_object_or_404(ReportArticle,id=report_article_id)
+        # article=get_object_or_404(ReportArticle,id=report_article_id)
         serializer = ReportArticleCommentSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
-            serializer.save(author=request.user,article=article)
+            serializer.save(author=request.user,article_id=report_article_id)
             return Response({'message':'succees create','data':serializer.data})
         else:
             return Response({"Message": serializer.errors})
+
+
 
     def put(self,request,report_article_id,report_article_comment_id):
         article=get_object_or_404(ReportArticle,id=report_article_id)
