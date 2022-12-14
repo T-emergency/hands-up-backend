@@ -9,6 +9,8 @@ import json
 from goods.models import Goods
 from .models import TradeMessage
 from .serializers import TradeMessageSerializer
+from goods.serializers import GoodsSerializer
+from django.db.models import Q
 # Create your views here.
 
 
@@ -38,3 +40,49 @@ class ChatRoomView(APIView):
             
         else:
             return Response({'message': "접근 권한이 없습니다"})
+
+
+class ChatRoomList(APIView):
+    def get(self, request):
+        user = request.user
+        goods = Goods.objects.filter(Q(buyer_id=user.id)|Q(seller_id=user.id) &Q(trade_room__isnull=False))
+
+        context = {
+            "request": request,
+            "action": "list"
+        }
+        serializer = GoodsSerializer(goods,many=True, context=context)
+        
+        return Response(serializer.data)
+    
+
+
+class ChatMessageChek(APIView):
+    
+    # def get(self, request, goods_id,user_id):
+    #     messages = 
+    #     serializer = TradeMessageSerializer()
+    
+    def post(self, request, goods_id,user_id):
+        
+        if user_id == None:
+            return Response("읽을 메세지가 없습니다")
+        
+        goods = Goods.objects.get(id=goods_id)
+        message_list = TradeMessage.objects.filter(author_id=user_id, trade_room_id=goods.trade_room_id)
+        
+        for message in message_list:
+            message.is_read = request.data["is_read"]
+            message.save()
+        return Response("메세지 읽기 성공")
+    
+    
+class ChatMessageWaitCount(APIView):
+    def get(self, request, goods_id):
+
+        goods = get_object_or_404(Goods, id=goods_id)
+        messages = TradeMessage.objects.filter(trade_room_id=goods.trade_room_id, is_read=0)
+
+        serializer = TradeMessageSerializer(messages,many=True)
+        
+        return Response(serializer.data)

@@ -11,10 +11,10 @@ class FreeArticle(models.Model):
     image = models.ImageField(upload_to='', null=True, blank=True)
     author = models.ForeignKey(User, verbose_name='작성자', on_delete=models.CASCADE)
     hits =models.IntegerField(default=0)
-    
+
     class Meta:
         db_table = 'FreeArticle'
-        ordering = ['id']
+        ordering = ['-id']
 
     def __str__(self):
         return str(self.title)
@@ -28,11 +28,12 @@ class ReportArticle(models.Model):
     updated_at = models.DateTimeField('수정 시간', auto_now=True)
     image = models.ImageField(upload_to='', null=True, blank=True)
     author = models.ForeignKey(
-        User, verbose_name='작성자', on_delete=models.CASCADE)
+
+    User, verbose_name='작성자', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'ReportArticle'
-        ordering = ['id']
+        ordering = ['-id']
 
     def __str__(self):
         return str(self.title)
