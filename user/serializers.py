@@ -7,6 +7,7 @@ import re
 # model
 from user.models import User
 from goods.models import Goods
+from review.models import Review
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -102,3 +103,25 @@ class JoinSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError(detail="이미 존재하는 아이디에요!")
 
     #     return username
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    # TODO 판매상품 4개
+    author = serializers.SerializerMethodField()
+    receiver = serializers.SerializerMethodField()
+    created_at= serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        return obj.author.username
+
+    def get_receiver(self, obj):
+        return obj.receiver.username
+    
+    def get_created_at(self,obj):
+        return str(obj.created_at)[:19]
+    class Meta:
+        model = Review
+        fields = '__all__'

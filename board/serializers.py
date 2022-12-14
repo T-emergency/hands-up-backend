@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ReportArticle,ReportArticleComment,FreeArticle
+from .models import ReportArticle,ReportArticleComment,FreeArticle,FreeArticleComment
 from user.models import User
 
 class ReportArticleSerializer(serializers.ModelSerializer):
@@ -43,7 +43,7 @@ class FreeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreeArticle
         fields = ('title', 'content', 'author', 'image',)
-        read_only_fields = ('author','image',)
+        read_only_fields = ('author',)
         extra_kwargs = {'title': {
                         'error_messages': {
                         'required': '제목을 입력해주세요',
@@ -59,15 +59,24 @@ class FreeCreateSerializer(serializers.ModelSerializer):
 
 
 class FreeDetailSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        return obj.author.username
+
     class Meta:
         model = FreeArticle
         fields = "__all__"
-
-
 
 
 class FreeCommentSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        return obj.author.username
+
     class Meta:
-        model = FreeArticle
+        model = FreeArticleComment
         fields = "__all__"
+        read_only_fields=("author",)
 

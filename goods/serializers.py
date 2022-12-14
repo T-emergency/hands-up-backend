@@ -57,3 +57,34 @@ class GoodsSerializer(serializers.ModelSerializer):
         model = Goods
         fields = '__all__'
         read_only_fields = ['like', 'status']
+
+
+
+class GoodsListSerializer(serializers.ModelSerializer):
+
+    seller = serializers.StringRelatedField()
+    buyer = serializers.StringRelatedField()
+    is_like = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    participants_count = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        try:
+            return GoodsImageSerializer(obj.goodsimage_set.all()[0]).data
+            # return obj.goodsimage_set.all()[0].image.url
+        except IndexError:
+            return None
+
+    def get_is_like(self, obj):
+        user = self.context['request'].user
+        flag = user in obj.like.all()
+        return flag
+
+    def get_participants_count(self, obj):
+        return obj.auctionparticipant_set.count()
+
+
+    class Meta:
+        model = Goods
+        fields = '__all__'
+        read_only_fields = ['like', 'status']
