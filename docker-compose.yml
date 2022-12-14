@@ -1,0 +1,70 @@
+version: '3.8'
+
+volumes:
+  postgres: {} # postgresql에서 사용 할 볼륨 지정
+  django_media: {}
+  django_static: {}
+  
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.5
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    environment: # postgresql 컨테이너에서 사용할 환경변수 지정해주기
+      - POSTGRES_USER=user # 데이터베이스 사용자 지정
+      - POSTGRES_PASSWORD=P@ssw0rd # 사용자 비밀번호 지정
+      - POSTGRES_DB=django # 데이터베이스 이름 지정
+    restart: always
+
+  backend:
+    container_name: django_backend
+    build: .
+    entrypoint: sh -c "python manage.py collectstatic --no-input && service cron start && python manage.py crontab add && crontab -l &&python manage.py makemigrations && python manage.py migrate && gunicorn handsup.wsgi --workers=5 -b 0.0.0.0:8000"
+    restart: always
+    volumes:
+      - ./:/app/
+      - /etc/localtime:/etc/localtime:ro
+      - django_media:/app/media/ # nginx에서 media를 사용할 수 있도록 volume을 지정해줍니다.
+      - django_static:/app/static/ # nginx에서 static을 사용할 수 있도록 volume을 지정해줍니다.
+
+    ports:
+      - 8000:8000
+    env_file: 
+      - ./.env
+    depends_on:
+      - postgres
+      # - redis
+    expose:
+      - 8000
+
+  # redis:
+  #   image: redis:5
+  #   ports:
+  #       - "6379:6379"
+  asgiserver:
+    build: .
+    command: daphne -u /tmp/daphne.sock handsup.asgi:application --bind 0.0.0.0 -p 8080
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/app/
+    expose:
+      - 8080
+    restart: always
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.23.2
+    ports:
+      - "80:80" # http 포트포워딩
+      - "443:443" # https 포트포워딩
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - django_media:/media/ # django의 media를 사용할 수 있도록 volume을 지정해줍니다.
+      - django_static:/static/ # django의 static 사용할 수 있도록 volume을 지정해줍니다.
+    depends_on:
+      - backend
+    restart: always
+

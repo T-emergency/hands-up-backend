@@ -14,6 +14,7 @@ daphne==4.0.0
 Django==4.1.3
 django-cors-headers==3.13.0
 django-crontab==0.7.1
+django-filter==22.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 hyperlink==21.0.0

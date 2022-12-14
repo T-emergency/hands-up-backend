@@ -4,7 +4,6 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -72,31 +71,17 @@ CHANNEL_LAYERS = {
 
 # Channels
 # WSGI_APPLICATION = 'handsup.wsgi.application'
-# # Channels
-# ASGI_APPLICATION = 'handsup.asgi.application'
 
+# ASGI_APPLICATION = 'handsup.asgi.application'
 # CHANNEL_LAYERS = {
 #     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         },
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
+#         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         # 'CONFIG': {
+#         #     "hosts": [('127.0.0.1', 6379)],
+#         # },
 #     },
 # }
-
-# Channels
-WSGI_APPLICATION = 'handsup.wsgi.application'
-
-ASGI_APPLICATION = 'handsup.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     "hosts": [('127.0.0.1', 6379)],
-        # },
-    },
-}
 
 
 MIDDLEWARE = [
@@ -182,12 +167,13 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
-STATICFILES_DIRS = [BASE_DIR]
+# STATICFILES_DIRS = [BASE_DIR]
+# STATICFILES_DIRS = [BASE_DIR / 'static',]
+# STATIC_DIR = BASE_DIR / 'static'
 
+STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 # Default primary key field type
@@ -204,11 +190,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-# CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501']
+CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501']
 # 예외 없이 다 수락
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
-
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501', 'http://localhost:80', 'http://localhost:8000', 'http://172.30.1.90', 'http://172.30.1.90:80', 'http://172.30.1.90:8000']
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30000),

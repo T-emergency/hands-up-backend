@@ -25,10 +25,11 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 import chat.routing
 from django.core.asgi import get_asgi_application
-
+import django
 from .middleware import JwtAuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'handsup.settings')
+django.setup()
 # 클라이언트와 Channels 개발 서버가 연결 될 때, 어느 protocol 타입의 연결인지
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
