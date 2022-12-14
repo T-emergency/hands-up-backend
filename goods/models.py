@@ -25,7 +25,6 @@ class Goods(models.Model):
     start_date = models.DateField()
     start_time = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
-    
     like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
 
 

@@ -83,18 +83,24 @@ class UserGoodsView(ModelViewSet):
 
 
     def get_queryset(self):
-        status = {'null':None, 'true':True, 'false' : False}
         st = self.request.query_params.get('status', '')
 
-        if st == '':
-            queryset = Goods.objects.all().prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
-            print(queryset)
-            print("위",self.kwargs['user_id'])
+        status = {'null':None, 'true':True, 'false' : False, 'buy' : 'buy', 'sell' : 'sell', 'like' : 'like'}
 
+        # 여기서 시도를 해보자 url 만들지 말고
+        # st말고 다른값을 넘겨줘서 판매상품 구매상품 관심상품 보여주자
+        #  쿼리셋만 바꿔주면 되니까
+
+        if st == 'sell':
+            queryset = Goods.objects.all().filter(seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        elif st=='buy':
+            queryset = Goods.objects.filter(buyer_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        elif st=='like':
+            queryset=Goods.objects.filter(like=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+        elif st=='':
+            queryset = Goods.objects.filter(seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
         else:
-            queryset = Goods.objects.filter(status=status[st], seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
-            print(queryset)
-            print("아래",self.kwargs['user_id'])
+            queryset = Goods.objects.filter(status=status[st]).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
         return queryset
 
 
