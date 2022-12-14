@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from .serializers import CustomTokenObtainPairSerializer, UserSerializer,ProfileSerializer,UserProfileSerializer,ReviewListSerializer
+from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer,UserProfileSerializer,ReviewListSerializer
 from .models import User
 from goods.models import Goods
 from review.models import Review
@@ -91,8 +91,6 @@ class UserProfileView(APIView):
             "like_goods":serialize_like.data,
             "user_data":serialize_user.data,
         }
-        return Response(user_data)
-
         return Response(user_data)
 
 

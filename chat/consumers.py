@@ -139,6 +139,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
           try: # 방어 코드
             money = int(text_data_json['message'])
+            print(money)
           except ValueError:
             return False
           
