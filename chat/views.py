@@ -45,7 +45,7 @@ class ChatRoomView(APIView):
 class ChatRoomList(APIView):
     def get(self, request):
         user = request.user
-        goods = Goods.objects.filter(Q(buyer_id=user.id)|Q(seller_id=user.id) &Q(trade_room__isnull=False))
+        goods = Goods.objects.filter(status = False).filter(Q(buyer_id=user.id)|Q(seller_id=user.id) & Q(trade_room__isnull=False) )
 
         context = {
             "request": request,
