@@ -24,12 +24,10 @@ class ReviewAPIView(APIView):
         """
         판매글에서 대화창에 들어왔을때 로컬스토리지, 쿼리파라미터로 받음
         """
-
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
         score=(request.data.get('score'))
-        print(score)
         if review_exist==True:
             """
             리뷰 1회 제한
@@ -56,6 +54,7 @@ class ReviewAPIView(APIView):
                             buyer.react_at = active_at[:10]
                             buyer.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
+                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너는 아니네요"}, status=status.HTTP_200_OK)
 
@@ -79,6 +78,7 @@ class ReviewAPIView(APIView):
                             seller.react_at = active_at[:10]
                             seller.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
+                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
