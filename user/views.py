@@ -3,6 +3,7 @@ from rest_framework import status, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
 
 
 from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer
@@ -10,6 +11,13 @@ from .models import User
 from goods.models import Goods
 
 from goods.serializers import GoodsSerializer
+
+class UserInfoAPIView(APIView):
+    def get(self, request, user_id):
+        user=get_object_or_404(User, id=user_id)
+        serializer=UserSerializer(user)
+        return Response(serializer.data)
+
 
 class UserView(APIView):
     def get(self, request):
@@ -40,8 +48,7 @@ class UserView(APIView):
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            print(user)
-            print(serializer.data)
+
             return Response({'msg': '저장완료'}, status=status.HTTP_200_OK)
         else:
             data = dict()

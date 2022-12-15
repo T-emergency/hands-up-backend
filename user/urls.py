@@ -11,6 +11,7 @@ urlpatterns = [
 
     #user profile
     path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile'),
+    path('info/<int:user_id>/', views.UserInfoAPIView.as_view(), name = 'user_info'),
 
     # 회원 가입 
     path('', UserView.as_view(), name='user_view'),

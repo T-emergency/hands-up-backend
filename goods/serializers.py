@@ -35,6 +35,7 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 
     def get_is_like(self, obj):
+        print(self.context)
         user = self.context['request'].user
         flag = user in obj.like.all()
         return flag
