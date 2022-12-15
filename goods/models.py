@@ -21,17 +21,17 @@ class Goods(models.Model):
     status = models.BooleanField(null=True, blank =True)
     predict_price = models.IntegerField()
     start_price = models.IntegerField()
-    high_price = models.IntegerField(null=True, blank=True)
+    high_price = models.IntegerField(default=0 ,null=True, blank=True)
     start_date = models.DateField()
     start_time = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
     like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
 
 
-
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension])
+
 
     class Meta:
         db_table = "GoodsImage"

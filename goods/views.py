@@ -1,4 +1,10 @@
+from django.db.models import Count, Sum, F, Q
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import permissions
+
+from .models import GoodsImage, Goods
+
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
@@ -7,7 +13,7 @@ from rest_framework import status, permissions
 
 from .models import Goods
 from user.models import User
-from .serializers import GoodsSerializer
+from .serializers import GoodsListSerializer, GoodsSerializer
 
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -59,6 +65,7 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
+        print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,
@@ -66,9 +73,18 @@ class GoodsView(ModelViewSet):
             'action' : self.action
         }
 
-
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
+
+
+    @action(detail=False, methods=['GET'])
+    def recommend_goods(self, request):
+
+        q = Q(status = True) | Q(status = None)
+        recommend_goods = self.get_queryset().filter(q).annotate(participants_count = Count('auctionparticipant')).order_by('-participants_count')[:10]
+        serializer = GoodsListSerializer(recommend_goods, many = True, context = self.get_serializer_context())
+
+        return Response(data = serializer.data, status=status.HTTP_200_OK)
 
 
 class UserGoodsView(ModelViewSet):
@@ -192,6 +208,7 @@ class GoodsLike(APIView):
     
 #     def post(self, request):
 #         serializer = GoodsSerializer(data=request.data, context={'request':request})
+
         
 #         if serializer.is_valid():
 #             serializer.save(seller=request.user)

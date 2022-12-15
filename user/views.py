@@ -6,9 +6,10 @@ from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 
 
-from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer
+from .serializers import CustomTokenObtainPairSerializer, JoinSerializer, UserSerializer,ProfileSerializer,UserProfileSerializer,ReviewListSerializer
 from .models import User
 from goods.models import Goods
+from review.models import Review
 
 from goods.serializers import GoodsSerializer
 
@@ -73,24 +74,30 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 # User profile
 class UserProfileView(APIView):
     def get(self, request, user_id):
-
+        data = {
+            "request" : request,
+            "action" : "list"
+        }
         #판매내역
         sell_goods = Goods.objects.filter(seller_id = user_id)
-        serialize_sell = GoodsSerializer(sell_goods, many=True)
+        serialize_sell = GoodsSerializer(sell_goods, many=True,context=data)
         #구매내역
         buy_goods = Goods.objects.filter(buyer_id = user_id)
-        serialize_buy = GoodsSerializer(buy_goods,many=True)
+        serialize_buy = GoodsSerializer(buy_goods,many=True, context=data)
         #관심목록
         like_goods = Goods.objects.filter(like = user_id)
-        serialize_like = GoodsSerializer(like_goods,many=True)
-        print(".........data에 묶기 전")
+        serialize_like = GoodsSerializer(like_goods,many=True,context=data)
+        #user정보
+        user = User.objects.get(id = user_id)
+        serialize_user = UserProfileSerializer(user)
+        serialize_like = GoodsSerializer(like_goods,many=True,context=data)
+
         user_data = {
             "sell_goods":serialize_sell.data,
             "buy_goods":serialize_buy.data,
             "like_goods":serialize_like.data,
+            "user_data":serialize_user.data,
         }
-        print('-------data에 묶은 후')
-
         return Response(user_data)
 
 
@@ -175,3 +182,39 @@ class UserViewSet(viewsets.ViewSet):
     def get_info(self, request, pk=None):
         user = request.user
         return Response({'result':'d'}, status=status.HTTP_200_OK)
+
+class UserProfileReviewView(APIView):
+    def get(self, request, user_id):
+            
+            """
+            내 정보에 들어갔을때 후기모음
+            """
+            review_list=Review.objects.filter(receiver_id=user_id)
+            review_list_order_by = review_list.order_by('-created_at')
+            serializer=ReviewListSerializer(review_list_order_by, many=True)
+
+            bad_review_count = review_list.filter(score=-20).count()
+            soso_review_count = review_list.filter(score=0).count()
+            good_review_count = review_list.filter(score=3).count()
+            excellent_review_count = review_list.filter(score=5).count()
+
+            receiver=User.objects.get(id=user_id)
+            receiver_serializer=UserSerializer(receiver)
+
+            image=[]
+            for review in review_list_order_by:
+                author=UserSerializer(review.author).data['profile_image']
+                image.append(author)
+
+            data = {
+                "bad_review_count":bad_review_count,
+                "soso_review_count":soso_review_count,
+                "good_review_count":good_review_count,
+                "excellent_review_count":excellent_review_count,
+                "results":serializer.data,
+                "receiver":receiver_serializer.data,
+                "review_image":image
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+            
