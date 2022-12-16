@@ -22,7 +22,6 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields=('goods','author','receiver')
 
-
 class ReviewListSerializer(serializers.ModelSerializer):
     # TODO 판매상품 4개
     author = serializers.SerializerMethodField()

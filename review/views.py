@@ -54,7 +54,6 @@ class ReviewAPIView(APIView):
                             buyer.react_at = active_at[:10]
                             buyer.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
-                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너는 아니네요"}, status=status.HTTP_200_OK)
 
@@ -78,7 +77,6 @@ class ReviewAPIView(APIView):
                             seller.react_at = active_at[:10]
                             seller.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
-                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
@@ -93,34 +91,39 @@ class UserInfoAPIView(APIView):
         
         """
         판매자 정보에 들어갔을때 후기모음
+        필요한 것
+        받은사람은사람 이름, 사진 | 리뷰 작성자 이름 사진 시간 내용 | 리뷰의 개수
+        리뷰갖고와서 receiver하면 유저정보가 없을 수 있음 그럼 user에 만들어둔걸로 유저 불러오고
+        카운트 어떻게 할건지
+        지금은 사실 유저의 데이터 불러오는게 중요
+        일단 원래대로 이미지 공부하고 성공하면 유저따로
         """
-        review_list=Review.objects.filter(receiver_id=user_id)
-        review_list_order_by = review_list.order_by('-created_at')
-        serializer=ReviewListSerializer(review_list_order_by, many=True)
 
-        bad_review_count = review_list.filter(score=-20).count()
-        soso_review_count = review_list.filter(score=0).count()
-        good_review_count = review_list.filter(score=3).count()
-        excellent_review_count = review_list.filter(score=5).count()
-
-        receiver=User.objects.get(id=user_id)
-        receiver_serializer=UserSerializer(receiver)
-
-        image=[]
-        for review in review_list_order_by:
-            author=UserSerializer(review.author).data['profile_image']
-            image.append(author)
-
+        reviews=Review.objects.filter(receiver_id=user_id).prefetch_related('author')
+        serializer=ReviewListSerializer(reviews, many=True)
+        bad_review_count=0
+        soso_review_count=0
+        good_review_count=0
+        excellent_review_count=0
+        for review in reviews:
+            if review.score==-20:
+                bad_review_count =+1
+            elif review.score==0:
+                soso_review_count =+1
+            elif review.score==3:
+                good_review_count =+1
+            elif review.score==5:
+                excellent_review_count =+1
+        image=[{UserSerializer(review.author).data['profile_image']} for review in reviews]
         data = {
             "bad_review_count":bad_review_count,
             "soso_review_count":soso_review_count,
             "good_review_count":good_review_count,
             "excellent_review_count":excellent_review_count,
-            "results":serializer.data,
-            "receiver":receiver_serializer.data,
-            "review_image":image
+            "review_image":image,
+            "results":serializer.data
         }
-
         return Response(data, status=status.HTTP_200_OK)
+
 
 
