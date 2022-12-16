@@ -17,7 +17,7 @@ class UserInfoAPIView(APIView):
     def get(self, request, user_id):
         user=get_object_or_404(User, id=user_id)
         serializer=UserSerializer(user)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserView(APIView):
