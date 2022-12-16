@@ -5,6 +5,7 @@ volumes:
   django_media: {}
   django_static: {}
   static_volume: {}
+
 services:
 
   postgres:
@@ -24,68 +25,41 @@ services:
     ports:
       - "80:80" # http 포트포워딩
       - "443:443" # https 포트포워딩
-    volumes:
+    volumes: # 도커 볼륨에다가 파일을 넣어줘야함. # CLI에서 cp하면 이미지를 넣을 수 있음
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - django_media:/media/ # django의 media를 사용할 수 있도록 volume을 지정해줍니다.
       - django_static:/static/ # django의 static 사용할 수 있도록 volume을 지정해줍니다.
     depends_on:
-      - web
+      - asgiserver
+      - backend
     restart: always
-
-  web:
-    container_name: 'web'
+#빌드는 도커파일 docker cp ./media django_backend:/app/media
+  backend: # 도커 볼륨을 날리고 싱크를 날림 host:container
+    container_name: django_backend
     build: .
-      # context: ./app
-      # dockerfile: Dockerfile.prod
-    command: daphne -b 0.0.0.0 -p 8000 handsup.asgi:application
+    entrypoint: sh -c "service cron start && python manage.py crontab add && python manage.py makemigrations && python manage.py migrate && gunicorn handsup.wsgi --workers=5 -b 0.0.0.0:8000"
+    restart: always
     volumes:
-      - static_volume:/static
-      # - media_volume:/app/mediafiles
-    expose:
-      - 8000
-    # env_file:
-      # - ./.env.prod
+      - ./:/app/
+      - /etc/localtime:/etc/localtime:ro
+      - django_media:/app/media/ # nginx에서 media를 사용할 수 있도록 volume을 지정해줍니다.
+      - django_static:/app/static/ # nginx에서 static을 사용할 수 있도록 volume을 지정해줍니다.
     depends_on:
       - postgres
-    # networks:
-    #   - docker-network
-  # backend:
-  #   container_name: django_backend
-  #   build: .
-  #   entrypoint: sh -c "service cron start && python manage.py crontab add && crontab -l &&python manage.py makemigrations && python manage.py migrate && gunicorn handsup.wsgi --workers=5 -b 0.0.0.0:8000"
-  #   restart: always
-  #   volumes:
-  #     - ./:/app/
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - django_media:/app/media/ # nginx에서 media를 사용할 수 있도록 volume을 지정해줍니다.
-  #     - django_static:/app/static/ # nginx에서 static을 사용할 수 있도록 volume을 지정해줍니다.
-
-  #   ports:
-  #     - 8000:8000
-  #   env_file: 
-  #     - ./.env
-  #   depends_on:
-  #     - postgres
   #     # - redis
   #   expose:
   #     - 8000
+#컨테이너끼리 통신할때는 이름으로, 컨테이너끼리는 포트포워딩 설정을 안해도됨
+  redis:
+    image: redis:5
+    
+  asgiserver:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8080 handsup.asgi:application
+    # command: daphne -u /tmp/daphne.sock handsup.asgi:application --bind 0.0.0.0 -p 8080
 
-  # # redis:
-  # #   image: redis:5
-  # #   ports:
-  # #       - "6379:6379"
-  # asgiserver:
-  #   build: .
-  #   command: daphne -u /tmp/daphne.sock handsup.asgi:application --bind 0.0.0.0 -p 8080
-  #   ports:
-  #     - 8080:8080
-  #   volumes:
-  #     - ./:/app/
-  #   expose:
-  #     - 8080
-  #   restart: always
-
-
-# networks:
-#   docker-network:
-#     driver: bridge
+    volumes:
+      - ./:/app/
+    restart: always
+    depends_on:
+      - redis

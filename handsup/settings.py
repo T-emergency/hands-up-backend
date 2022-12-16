@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-qmer4$u7sivk=1_m6_-zg&quo7=srdnwm+)p1quqyepo^b&^d1
 # DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['backend']
 
 # goods(auction) user community review?
 # Application definition
@@ -64,7 +64,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [('redis', 6379)],
         },
     },
 }
@@ -190,11 +190,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501']
+CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501', 'http://127.0.0.1:5501']
 # 예외 없이 다 수락
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501', 'http://localhost:80', 'http://localhost:8000', 'http://172.30.1.90', 'http://172.30.1.90:80', 'http://172.30.1.90:8000']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://127.0.0.1:5501','http://localhost:5501', 'http://localhost:80', 'http://localhost:8000', 'http://172.30.1.90', 'http://172.30.1.90:80', 'http://172.30.1.90:8000']
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30000),
