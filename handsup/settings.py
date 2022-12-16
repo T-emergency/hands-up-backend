@@ -1,22 +1,27 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
+env = environ.Env(DEBUG=(bool, True))
+environ.Env.read_env(
+    env_file=os.path.join(BASE_DIR, '.env')
+)
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False
-DEBUG = int(os.environ.get("DEBUG", 1))
+DEBUG = int(env("DEBUG", 1))
 
 
-if os.environ.get('DJANGO_ALLOWED_HOSTS'):
-    ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split()
+if env('DJANGO_ALLOWED_HOSTS'):
+    ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS').split()
 else:
     ALLOWED_HOSTS = []
 # goods(auction) user community review?
@@ -134,16 +139,16 @@ REST_FRAMEWORK = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-POSTGRES_DB = os.environ.get('POSTGRES_DB', '')
+POSTGRES_DB = env('POSTGRES_DB', '')
 if POSTGRES_DB:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': POSTGRES_DB,
-            'USER': os.environ.get('POSTGRES_USER', ''),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-            'HOST': os.environ.get('POSTGRES_HOST', ''),
-            'PORT': os.environ.get('POSTGRES_PORT', ''),
+            'USER': env('POSTGRES_USER', ''),
+            'PASSWORD': env('POSTGRES_PASSWORD', ''),
+            'HOST': env('POSTGRES_HOST', ''),
+            'PORT': env('POSTGRES_PORT', ''),
         }
     }
 

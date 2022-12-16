@@ -33,6 +33,7 @@ RUN apt-get install -y cron
 # requirments.txt를 작업 디렉토리(/app/) 경로로 복사합니다.
 COPY ./requirements.txt .
 
+
 # 프로젝트 실행에 필요한 패키지들을 설치합니다.
 RUN pip install --no-cache-dir -r requirements.txt
 
