@@ -14,9 +14,13 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data/
     environment: # postgresql 컨테이너에서 사용할 환경변수 지정해주기
-      - POSTGRES_USER=user # 데이터베이스 사용자 지정
-      - POSTGRES_PASSWORD=P@ssw0rd # 사용자 비밀번호 지정
-      - POSTGRES_DB=django # 데이터베이스 이름 지정
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    # environment: # postgresql 컨테이너에서 사용할 환경변수 지정해주기
+    #   - POSTGRES_USER=user # 데이터베이스 사용자 지정
+    #   - POSTGRES_PASSWORD=P@ssw0rd # 사용자 비밀번호 지정
+    #   - POSTGRES_DB=django # 데이터베이스 이름 지정
     restart: always
 
   nginx:
@@ -44,6 +48,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - django_media:/app/media/ # nginx에서 media를 사용할 수 있도록 volume을 지정해줍니다.
       - django_static:/app/static/ # nginx에서 static을 사용할 수 있도록 volume을 지정해줍니다.
+    environment: # 
+      - DEBUG
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
     depends_on:
       - postgres
   #     # - redis
