@@ -267,10 +267,11 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
           
         await self.accept()
       else:
-        await self.disconnect()
+        # await self.disconnect()
+        return False
 
 
-    async def disconnect(self):
+    async def disconnect(self, close_code):
 
         # Leave room group
         await self.channel_layer.group_discard(
@@ -279,12 +280,12 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         )
         
 
-        if self.scope.get('user').is_authenticated:
+        # if self.scope.get('user').is_authenticated:
 
-          await self.channel_layer.group_discard(
-            self.alert_room_name,
-            self.channel_name
-          )
+        #   await self.channel_layer.group_discard(
+        #     self.alert_room_name,
+        #     self.channel_name
+        #   )
 
 
     # Receive message from WebSocket
@@ -296,7 +297,6 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         
         user = await self.get_user_obj(user_id)
         goods = await self.get_goods_obj(goods_id)
-        print(goods)
         trade_room_id = goods.trade_room_id
         # trade_room_id = goods["trade_room"]
 
@@ -318,7 +318,7 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
           await self.create_trade_message_obj(user_id, message, trade_room_id)
 
         else:
-          await self.disconnect()
+          # await self.disconnect()
           return False
         # Send message to room group
         await self.channel_layer.group_send(

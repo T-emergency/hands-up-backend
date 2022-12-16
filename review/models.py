@@ -14,7 +14,7 @@ class Review(models.Model):
     author = models.ForeignKey(User, on_delete = models.CASCADE, related_name='review_author')
     receiver = models.ForeignKey(User, on_delete = models.CASCADE, related_name='review_receiver')
     goods = models.ForeignKey(Goods, on_delete = models.CASCADE)
-    content = models.CharField(max_length=100, blank=False)
+    content = models.CharField(max_length=50, blank=False)
     score = models.SmallIntegerField(
             validators=[
             MaxValueValidator(5),

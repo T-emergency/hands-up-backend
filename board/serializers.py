@@ -3,6 +3,10 @@ from .models import ReportArticle,ReportArticleComment,FreeArticle,FreeArticleCo
 from user.models import User
 
 class ReportArticleSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    def get_username(self,obj):
+        return obj.author.username
+        
     class Meta:
         model = ReportArticle
         fields = '__all__'
@@ -12,6 +16,9 @@ class ReportArticleSerializer(serializers.ModelSerializer):
 
 
 class ReportArticleCommentSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    def get_username(self,obj):
+        return obj.author.username
     class Meta:
         model = ReportArticleComment
         fields = '__all__'
