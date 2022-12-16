@@ -7,23 +7,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-env = environ.Env(DEBUG=(bool, True))
-environ.Env.read_env(
-    env_file=os.path.join(BASE_DIR, '.env')
-)
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'secret')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = int(env("DEBUG", 1))
+DEBUG = True
 
 
-if env('DJANGO_ALLOWED_HOSTS'):
-    ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS').split()
-else:
-    ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['backend']
+
 # goods(auction) user community review?
 # Application definition
 
@@ -139,19 +131,18 @@ REST_FRAMEWORK = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-POSTGRES_DB = env('POSTGRES_DB', '')
-if POSTGRES_DB:
+POSTGRES_DB = os.environ.get('POSTGRES_DB', '')
+if not POSTGRES_DB:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': POSTGRES_DB,
-            'USER': env('POSTGRES_USER', ''),
-            'PASSWORD': env('POSTGRES_PASSWORD', ''),
-            'HOST': env('POSTGRES_HOST', ''),
-            'PORT': env('POSTGRES_PORT', ''),
+            'USER': os.environ.get('POSTGRES_USER', ''),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+            'HOST': os.environ.get('POSTGRES_HOST', ''),
+            'PORT': os.environ.get('POSTGRES_PORT', ''),
         }
     }
-
 # 환경변수가 존재하지 않을 경우 sqlite3을 사용합니다.
 else:
     DATABASES = {
@@ -218,11 +209,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501', 'http://127.0.0.1:5501']
+CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr',]
 # 예외 없이 다 수락
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://127.0.0.1:5501','http://localhost:5501', 'http://localhost:80', 'http://localhost:8000', 'http://172.30.1.90', 'http://172.30.1.90:80', 'http://172.30.1.90:8000']
+CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30000),
