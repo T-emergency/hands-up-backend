@@ -125,18 +125,18 @@ class AuthSms(models.Model):
 
     def send_sms(self):
 
-        url = 'https://sens.apigw.ntruss.com/sms/v2/services//messages'
+        url = ''
         data = {
             "type": "SMS",
             "contentType" : "COMM",
-            "from": "",
+            "from": "01055411336",
             "messages":[{"to":self.phone_number, "subject" : "제목입니다"}],
             "content": "[핸즈업] 본인 확인 인증 번호 [{}]를 입력해주세요.".format(self.auth_number)
         }
         headers = {
             "Content-Type": "application/json",
             "x-ncp-apigw-timestamp" : str(int(time.time() * 1000)),
-            "x-ncp-iam-access-key": 'x4pbA8ajyhwvapD1pzmg',
+            "x-ncp-iam-access-key": '',
             "x-ncp-apigw-signature-v2": self.make_signature(),
         }
         requests.post(url, data=json.dumps(data), headers=headers)

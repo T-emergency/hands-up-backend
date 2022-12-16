@@ -96,6 +96,8 @@ class UserGoodsView(ModelViewSet):
     search_fields = ['title','content']
     pagination_class = GoodsPagination
     lookup_field='user_id'
+    pagination_class = GoodsPagination
+
 
 
     def get_queryset(self):

@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status, permissions, viewsets
 from rest_framework.decorators import action
@@ -218,3 +219,10 @@ class UserProfileReviewView(APIView):
 
             return Response(data, status=status.HTTP_200_OK)
             
+class UserInfoAPIView(APIView):
+    def get(self, request, user_id):
+        user=get_object_or_404(User, id=user_id)
+        serializer=UserSerializer(user)
+        return Response(serializer.data)
+
+
