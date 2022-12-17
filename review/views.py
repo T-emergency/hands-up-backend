@@ -117,3 +117,17 @@ class ReviewAPIView(APIView):
                         return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
+
+
+def limit_file_size(max_size): # 여기에서 입력값을 받을 수 있음. max_size
+    def wrapper(func):
+        @wraps(func)
+        def decorator(request, *args, **kwargs):
+            files = request.FILES
+
+            for k in files.keys():
+                if files[k].size > max_size: # 여기에서 입력값 max_size 사용
+                    return "error"
+            return func(request, *args, **kwargs) # 데코레이팅(?)된 함수 실행
+        return decorator
+    return wrapper
