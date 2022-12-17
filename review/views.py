@@ -14,7 +14,7 @@ import datetime
 from datetime import timedelta
 class ReviewAPIView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, user_id):
+    def get(self, request):
         
         """
         판매자 정보에 들어갔을때 후기모음
@@ -25,7 +25,7 @@ class ReviewAPIView(APIView):
         지금은 사실 유저의 데이터 불러오는게 중요
         일단 원래대로 이미지 공부하고 성공하면 유저따로
         """
-
+        user_id=request.query_params.get('user_id','')
         reviews=Review.objects.filter(receiver_id=user_id).prefetch_related('author')
         serializer=ReviewListSerializer(reviews, many=True)
         bad_review_count=0
@@ -58,8 +58,8 @@ class ReviewAPIView(APIView):
         리뷰를 남기면서 상대방의 매너를 평가하는 기능
         판매글에서 대화창에 들어왔을때 로컬스토리지, 쿼리파라미터로 받음
         """
+
         goods_id=request.query_params.get('goods_id','')
-        print(goods_id)
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
@@ -75,7 +75,7 @@ class ReviewAPIView(APIView):
                 author 셀러일때 review의 receiver 저장
                 """
                 buyer=get_object_or_404(User, id=goods_obj.buyer_id)
-                buyer.rating_score = buyer.rating_score + int(score)
+                buyer.saved_score = buyer.saved_score + int(score)
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -85,9 +85,9 @@ class ReviewAPIView(APIView):
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.buyer_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             time_now=datetime.datetime.now()
-                            active_at=str(time_now+timedelta(weeks=3))
+                            react_at=str(time_now+timedelta(weeks=3))
                             buyer.is_active = 0
-                            buyer.react_at = active_at[:10]
+                            buyer.react_at = react_at[:10]
                             buyer.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
@@ -98,7 +98,7 @@ class ReviewAPIView(APIView):
                 author 바이어일때 receiver 저장
                 """
                 seller=get_object_or_404(User, id=goods_obj.seller_id)
-                seller.rating_score = seller.rating_score + int(score)
+                seller.saved_score = seller.saved_score + int(score)
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -108,26 +108,12 @@ class ReviewAPIView(APIView):
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.seller_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             time_now=datetime.datetime.now()
-                            active_at=str(time_now+timedelta(weeks=3))
+                            react_at=str(time_now+timedelta(weeks=3))
                             seller.is_active = 0
-                            seller.react_at = active_at[:10]
+                            seller.react_at = react_at[:10]
                             seller.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
-
-
-def limit_file_size(max_size): # 여기에서 입력값을 받을 수 있음. max_size
-    def wrapper(func):
-        @wraps(func)
-        def decorator(request, *args, **kwargs):
-            files = request.FILES
-
-            for k in files.keys():
-                if files[k].size > max_size: # 여기에서 입력값 max_size 사용
-                    return "error"
-            return func(request, *args, **kwargs) # 데코레이팅(?)된 함수 실행
-        return decorator
-    return wrapper
