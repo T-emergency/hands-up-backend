@@ -15,36 +15,6 @@ from datetime import timedelta
 class ReviewAPIView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
-        q1 = 0.4
-        q2 = 0.3
-        q3 = 0.2
-        q4 = 0.1
-        update_time = datetime.datetime.now()
-        users = User.objects.all()
-        for user in users:
-            reviews = Review.objects.filter(receiver_id=user.id)
-            flag = 0
-            for review in reviews:
-                score=0
-                if update_time - timedelta(weeks=12) < review.created_at < update_time:
-                    score+=review.score * q1
-                    # print("시간",update_time)
-                    # print("시간",update_time - timedelta(weeks=12))
-                    # print("시간",update_time - timedelta(weeks=24))
-                    # print("시간",update_time - timedelta(weeks=36))
-                    # print("시간",update_time - timedelta(weeks=48))
-                if update_time - timedelta(weeks=24) < review.created_at <= update_time - timedelta(weeks=12):
-
-                    score+=review.score * q2
-                if update_time - timedelta(weeks=36) < review.created_at <= update_time - timedelta(weeks=24):
-
-                    score+=review.score * q3
-                if update_time - timedelta(weeks=48) < review.created_at <= update_time - timedelta(weeks=36):
-
-                    score+=review.score * q4
-                flag += score
-            user.rating_score = 40 + flag
-            user.save()
         """
         str(datetime.date.today())[:10]
         판매자 정보에 들어갔을때 후기모음
@@ -56,7 +26,7 @@ class ReviewAPIView(APIView):
         일단 원래대로 이미지 공부하고 성공하면 유저따로
         """
         user_id=request.query_params.get('user_id','')
-        reviews=Review.objects.filter(receiver_id=user_id).prefetch_related('author')
+        reviews=Review.objects.filter(receiver_id=user_id)
         serializer=ReviewListSerializer(reviews, many=True)
         bad_review_count=0
         soso_review_count=0
@@ -71,16 +41,17 @@ class ReviewAPIView(APIView):
                 good_review_count =+1
             elif review.score==5:
                 excellent_review_count =+1
-        image=[{UserSerializer(review.author).data['profile_image']} for review in reviews]
         data = {
             "bad_review_count":bad_review_count,
             "soso_review_count":soso_review_count,
             "good_review_count":good_review_count,
             "excellent_review_count":excellent_review_count,
-            "review_image":image,
             "results":serializer.data
         }
-        return Response(data, status=status.HTTP_200_OK)
+        if len(reviews) > 1:
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_200_OK)
 
     # TODO post하면 바로 점수반영
     def post(self, request):
