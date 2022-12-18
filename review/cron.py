@@ -64,21 +64,13 @@ def rating_score_reset():
         flag = 0
         for review in reviews:
             score = 0
-            if update_time - timedelta(weeks=12) < review.created_at < update_time:
+            if update_time - timedelta(weeks=12) < review.created_at <= update_time:
                 score+=review.score * q1
-                # print("시간",update_time)
-                # print("시간",update_time - timedelta(weeks=12))
-                # print("시간",update_time - timedelta(weeks=24))
-                # print("시간",update_time - timedelta(weeks=36))
-                # print("시간",update_time - timedelta(weeks=48))
-            if update_time - timedelta(weeks=24) < review.created_at <= update_time - timedelta(weeks=12):
-
+            elif update_time - timedelta(weeks=24) < review.created_at <= update_time - timedelta(weeks=12):
                 score+=review.score * q2
-            if update_time - timedelta(weeks=36) < review.created_at <= update_time - timedelta(weeks=24):
-
+            elif update_time - timedelta(weeks=36) < review.created_at <= update_time - timedelta(weeks=24):
                 score+=review.score * q3
-            if update_time - timedelta(weeks=48) < review.created_at <= update_time - timedelta(weeks=36):
-
+            elif update_time - timedelta(weeks=48) < review.created_at <= update_time - timedelta(weeks=36):
                 score+=review.score * q4
             flag += score
         user.rating_score = 40 + flag

@@ -19,6 +19,7 @@ def validate_minimum_size(width=None, height=None):
                 [f'Size should be at least {width} x {height} pixels.']
             )
 
+
     return validator
 
 

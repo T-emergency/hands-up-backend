@@ -76,7 +76,7 @@ class ReviewAPIView(APIView):
                 author 셀러일때 review의 receiver 저장
                 """
                 buyer=get_object_or_404(User, id=goods_obj.buyer_id)
-                buyer.saved_score = buyer.saved_score + int(score)
+                buyer.temp_score = buyer.temp_score + int(score)*0.4
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -99,7 +99,7 @@ class ReviewAPIView(APIView):
                 author 바이어일때 receiver 저장
                 """
                 seller=get_object_or_404(User, id=goods_obj.seller_id)
-                seller.saved_score = seller.saved_score + int(score)
+                seller.temp_score = seller.temp_score + int(score)*0.4
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
