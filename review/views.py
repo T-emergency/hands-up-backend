@@ -15,8 +15,38 @@ from datetime import timedelta
 class ReviewAPIView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
-        
+        q1 = 0.4
+        q2 = 0.3
+        q3 = 0.2
+        q4 = 0.1
+        update_time = datetime.datetime.now()
+        users = User.objects.all()
+        for user in users:
+            reviews = Review.objects.filter(receiver_id=user.id)
+            flag = 0
+            for review in reviews:
+                score=0
+                if update_time - timedelta(weeks=12) < review.created_at < update_time:
+                    score+=review.score * q1
+                    # print("시간",update_time)
+                    # print("시간",update_time - timedelta(weeks=12))
+                    # print("시간",update_time - timedelta(weeks=24))
+                    # print("시간",update_time - timedelta(weeks=36))
+                    # print("시간",update_time - timedelta(weeks=48))
+                if update_time - timedelta(weeks=24) < review.created_at <= update_time - timedelta(weeks=12):
+
+                    score+=review.score * q2
+                if update_time - timedelta(weeks=36) < review.created_at <= update_time - timedelta(weeks=24):
+
+                    score+=review.score * q3
+                if update_time - timedelta(weeks=48) < review.created_at <= update_time - timedelta(weeks=36):
+
+                    score+=review.score * q4
+                flag += score
+            user.rating_score = 40 + flag
+            user.save()
         """
+        str(datetime.date.today())[:10]
         판매자 정보에 들어갔을때 후기모음
         필요한 것
         받은사람은사람 이름, 사진 | 리뷰 작성자 이름 사진 시간 내용 | 리뷰의 개수
