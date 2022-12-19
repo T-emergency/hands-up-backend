@@ -258,11 +258,12 @@ CRONTAB_DJANGO_SETTINGS_MODULE='handsup.settings'
 #CRONTAB_DJANGO_SETTINGS_MODULE= os.path.join(BASE_DIR, 'handsup.settings')
 # crontab
 CRONJOBS = [
-    #!/bin/bash
-    # 매주 월요일 새벽 1시 비매너 유저 제재
-    ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
+    # 매주 월요일 새벽 1시 매너점수 반영, 비매너 유저 제재
+    ('0 1 * * 1', 'review.cron.anonymous_review', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
     # 매일 자정 비매너 유저 제재 풀기
-    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
+    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    # 4개월 마다 점수 리셋
+    ('0 0 1 */3 *', 'review.cron.rating_score_reset', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
     # 매분
     ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
     # ('* * * * *', 'goods.cron.test', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),

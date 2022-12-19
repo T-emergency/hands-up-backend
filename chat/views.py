@@ -18,7 +18,7 @@ class ChatView(APIView):
 
     def get(self, reqeust,goods_id):
         layer = get_channel_layer()
-        print(dir(layer), layer)
+        # print(dir(layer), layer)
         async_to_sync(layer.group_send)(f'chat_{goods_id}', {'type': 'chat_message', 'response': json.dumps({'response_type': 'message', 'message': 'hi'})})
     
         return Response('연결 성공')
@@ -35,7 +35,7 @@ class ChatRoomView(APIView):
         serializer = TradeMessageSerializer(trade_message,many=True)
         
         if is_trade_room and (request.user == buyer or request.user == seller):
-            print("test: ", buyer, seller,request.user)
+            # print("test: ", buyer, seller,request.user)
             return Response({'message': "입장", "data":serializer.data})
             
         else:
@@ -45,7 +45,7 @@ class ChatRoomView(APIView):
 class ChatRoomList(APIView):
     def get(self, request):
         user = request.user
-        goods = Goods.objects.filter(Q(buyer_id=user.id)|Q(seller_id=user.id) &Q(trade_room__isnull=False))
+        goods = Goods.objects.filter(status = False).filter(Q(buyer_id=user.id)|Q(seller_id=user.id) & Q(trade_room__isnull=False) )
 
         context = {
             "request": request,
@@ -81,7 +81,7 @@ class ChatMessageWaitCount(APIView):
     def get(self, request, goods_id):
 
         goods = get_object_or_404(Goods, id=goods_id)
-        messages = TradeMessage.objects.filter(trade_room_id=goods.trade_room_id, is_read=0)
+        messages = TradeMessage.objects.filter(trade_room_id=goods.trade_room_id, is_read=0).exclude(author_id=request.user.id)
 
         serializer = TradeMessageSerializer(messages,many=True)
         

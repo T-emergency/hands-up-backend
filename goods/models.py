@@ -5,6 +5,22 @@ from chat.models import TradeChatRoom
 
 # validators
 from django.core.validators import validate_image_file_extension
+from django.core.exceptions import ValidationError
+
+# 이게 에러가 뜨네요
+def validate_minimum_size(width=None, height=None):
+    def validator(image):
+        error = False
+        if width is not None and image.width < width:
+            error = True
+        if height is not None and image.height < height:
+            error = True
+        if error:
+            raise ValidationError(
+                [f'Size should be at least {width} x {height} pixels.']
+            )
+    return validator
+
 
 class Goods(models.Model):
     class Meta:
@@ -25,13 +41,12 @@ class Goods(models.Model):
     start_date = models.DateField()
     start_time = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
-    
     like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
 
 
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension])
+    image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension, validate_minimum_size(width=1, height=1)])
 
 
     class Meta:

@@ -6,11 +6,13 @@ from user.serializers import UserSerializer
 
 # models
 from .models import Goods, GoodsImage
+from rest_framework.exceptions import ValidationError
+from django.core.files.images import get_image_dimensions
 
 
 
 class GoodsImageSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = GoodsImage
         fields =['image',]
@@ -35,6 +37,7 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 
     def get_is_like(self, obj):
+        print(self.context)
         user = self.context['request'].user
         flag = user in obj.like.all()
         return flag
@@ -45,13 +48,26 @@ class GoodsSerializer(serializers.ModelSerializer):
         else:
             return 0
 
+    def validate(self, data):
+        # 바이트 기준
+        file_size= 34000
+        required_width = 1000
+        required_height = 1000
+        image_set = self.context['request'].FILES.getlist('images')
+        for i in image_set:
+            width, height = get_image_dimensions(i)
+            if i.size > file_size:
+                raise ValidationError("사진용량 초과")
+            elif width > required_width or height > required_height:
+                raise ValidationError("사진크기 초과")
+        return data
+
     def create(self, validated_data):
         instance = super().create(validated_data)
         image_set = self.context['request'].FILES.getlist('images')
         image_list = [GoodsImage(goods = instance, image = image) for image in image_set]
         GoodsImage.objects.bulk_create(image_list)
         return instance
-
 
     class Meta:
         model = Goods
