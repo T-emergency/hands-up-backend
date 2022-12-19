@@ -7,6 +7,7 @@ from chat.models import TradeChatRoom
 from django.core.validators import validate_image_file_extension
 from django.core.exceptions import ValidationError
 
+# 이게 에러가 뜨네요
 def validate_minimum_size(width=None, height=None):
     def validator(image):
         error = False
@@ -18,8 +19,6 @@ def validate_minimum_size(width=None, height=None):
             raise ValidationError(
                 [f'Size should be at least {width} x {height} pixels.']
             )
-
-
     return validator
 
 
