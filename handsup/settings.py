@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 import environ
+DJANGO_SETTINGS_MODULE='handsup.settings'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # service app
     'user',
     'review',
@@ -47,10 +48,10 @@ INSTALLED_APPS = [
 
     # crontab
     'django_crontab',
-    
+
     # Router
     'channels',
-    
+
 
 ]
 
@@ -118,7 +119,7 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication', ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    
+
 }
 
 
@@ -132,7 +133,7 @@ REST_FRAMEWORK = {
 #     }
 # }
 POSTGRES_DB = os.environ.get('POSTGRES_DB', '')
-if not POSTGRES_DB:
+if POSTGRES_DB:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -147,8 +148,14 @@ if not POSTGRES_DB:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            # 'ENGINE': 'django.db.backends.sqlite3',
+            # 'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': POSTGRES_DB,
+            'USER': os.environ.get('POSTGRES_USER', ''),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+            'HOST': os.environ.get('POSTGRES_HOST', ''),
+            'PORT': os.environ.get('POSTGRES_PORT', ''),
         }
     }
 
@@ -209,7 +216,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr',]
+CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr', 'http://43.200.179.49', 'http://backend.hands-up.co.kr']
 # 예외 없이 다 수락
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
@@ -247,15 +254,18 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+CRONTAB_DJANGO_SETTINGS_MODULE='handsup.settings'
+#CRONTAB_DJANGO_SETTINGS_MODULE= os.path.join(BASE_DIR, 'handsup.settings')
 # crontab
 CRONJOBS = [
+    #!/bin/bash
     # 매주 월요일 새벽 1시 비매너 유저 제재
-    ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
     # 매일 자정 비매너 유저 제재 풀기
-    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
     # 매분
-    ('* * * * *', 'goods.cron.get_goods_status', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
-    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
+    # ('* * * * *', 'goods.cron.test', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
 ]
 
 
