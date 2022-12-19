@@ -8,14 +8,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+DP_MODE = False
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'secret')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'secret') if DP_MODE else 'secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False if DP_MODE else True
 
 
-ALLOWED_HOSTS = ['backend']
+ALLOWED_HOSTS = ['backend'] if DP_MODE else ['*']
 
 # goods(auction) user community review?
 # Application definition
@@ -61,28 +62,21 @@ ASGI_APPLICATION = 'handsup.asgi.application'
 
 WSGI_APPLICATION = 'handsup.wsgi.application'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('redis', 6379)],
+if DP_MODE:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [('redis', 6379)],
+            },
         },
-    },
-}
-
-# Channels
-# WSGI_APPLICATION = 'handsup.wsgi.application'
-
-# ASGI_APPLICATION = 'handsup.asgi.application'
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         # 'CONFIG': {
-#         #     "hosts": [('127.0.0.1', 6379)],
-#         # },
-#     },
-# }
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 
 MIDDLEWARE = [
@@ -126,13 +120,9 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-POSTGRES_DB = os.environ.get('POSTGRES_DB', '')
+
+POSTGRES_DB = os.environ.get('POSTGRES_DB', '') if DP_MODE else False
+
 if POSTGRES_DB:
     DATABASES = {
         'default': {
@@ -148,14 +138,8 @@ if POSTGRES_DB:
 else:
     DATABASES = {
         'default': {
-            # 'ENGINE': 'django.db.backends.sqlite3',
-            # 'NAME': BASE_DIR / 'db.sqlite3',
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': POSTGRES_DB,
-            'USER': os.environ.get('POSTGRES_USER', ''),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-            'HOST': os.environ.get('POSTGRES_HOST', ''),
-            'PORT': os.environ.get('POSTGRES_PORT', ''),
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
@@ -190,20 +174,10 @@ USE_I18N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-
-# STATICFILES_DIRS = [BASE_DIR]
-# STATICFILES_DIRS = [BASE_DIR / 'static',]
-# STATIC_DIR = BASE_DIR / 'static'
-
 STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -218,8 +192,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # live server port 5500
 CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr', 'http://43.200.179.49', 'http://backend.hands-up.co.kr']
 # 예외 없이 다 수락
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False if DP_MODE else True
+CORS_ALLOW_ALL_ORIGINS = False if DP_MODE else True
 CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 SIMPLE_JWT = {

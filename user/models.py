@@ -140,7 +140,6 @@ class AuthSms(models.Model):
         id = os.environ.get('NID').strip()
         
         url = f'https://sens.apigw.ntruss.com/sms/v2/services/{id}/messages'
-        print(url)
         data = {
             "type": "SMS",
             "contentType" : "COMM",
@@ -162,8 +161,7 @@ class AuthSms(models.Model):
         timestamp = int(time.time() * 1000)
         timestamp = str(timestamp)
         access_key = os.environ.get('NAK').strip()		
-        secret_key = os.environ.get('NSK').strip()		
-        print(access_key, secret_key, os.environ.get('POSTGRES_DB', ''),os.environ.get('POSTGRES_PORT', ''),os.environ.get('POSTGRES_HOST', ''),os.environ.get('POSTGRES_PASSWORD', ''),os.environ.get('POSTGRES_USER', ''))
+        secret_key = os.environ.get('NSK').strip()
         secret_key = bytes(secret_key, 'UTF-8')
         method = "POST"
         URI = f'/sms/v2/services/{id}/messages'
