@@ -32,23 +32,15 @@ class ReviewAPIView(APIView):
         soso_review_count=0
         good_review_count=0
         excellent_review_count=0
-        print(reviews)
         for review in reviews:
             if review.score==-20:
-                print(review.score)
-                print(bad_review_count)
                 bad_review_count +=1
-                print(bad_review_count)
             elif review.score==0:
                 soso_review_count +=1
             elif review.score==3:
                 good_review_count +=1
             elif review.score==5:
                 excellent_review_count +=1
-        print("아래",bad_review_count)
-        print(soso_review_count)
-        print(good_review_count)
-        print(excellent_review_count)
         data = {
             "bad_review_count":bad_review_count,
             "soso_review_count":soso_review_count,

@@ -259,3 +259,4 @@ my_settings.py
 # migrations
 .vscode/
 venv2/
+media/
