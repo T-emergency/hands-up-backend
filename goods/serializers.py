@@ -38,7 +38,6 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 
     def get_is_like(self, obj):
-        print(self.context)
         user = self.context['request'].user
         flag = user in obj.like.all()
         return flag
@@ -48,12 +47,12 @@ class GoodsSerializer(serializers.ModelSerializer):
             return obj.auctionparticipant_set.count()
         else:
             return 0
-
+    # TODO 확장자 validation
     def validate(self, data):
         # 바이트 기준
-        file_size= 500000
-        required_width = 2000
-        required_height = 2000
+        file_size= 5242880 # 5MB
+        required_width = 1000
+        required_height = 1000
         image_set = self.context['request'].FILES.getlist('images')
         for i in image_set:
             width, height = get_image_dimensions(i)
