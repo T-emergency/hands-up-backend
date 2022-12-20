@@ -32,15 +32,23 @@ class ReviewAPIView(APIView):
         soso_review_count=0
         good_review_count=0
         excellent_review_count=0
+        print(reviews)
         for review in reviews:
             if review.score==-20:
-                bad_review_count =+1
+                print(review.score)
+                print(bad_review_count)
+                bad_review_count +=1
+                print(bad_review_count)
             elif review.score==0:
-                soso_review_count =+1
+                soso_review_count +=1
             elif review.score==3:
-                good_review_count =+1
+                good_review_count +=1
             elif review.score==5:
-                excellent_review_count =+1
+                excellent_review_count +=1
+        print("아래",bad_review_count)
+        print(soso_review_count)
+        print(good_review_count)
+        print(excellent_review_count)
         data = {
             "bad_review_count":bad_review_count,
             "soso_review_count":soso_review_count,
@@ -48,7 +56,7 @@ class ReviewAPIView(APIView):
             "excellent_review_count":excellent_review_count,
             "results":serializer.data
         }
-        if len(reviews) > 1:
+        if len(reviews) > 0:
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_200_OK)
@@ -76,7 +84,7 @@ class ReviewAPIView(APIView):
                 author 셀러일때 review의 receiver 저장
                 """
                 buyer=get_object_or_404(User, id=goods_obj.buyer_id)
-                buyer.temp_score = buyer.temp_score + int(score)*0.4
+                buyer.rating_score = buyer.rating_score + int(score)*0.4
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -99,7 +107,7 @@ class ReviewAPIView(APIView):
                 author 바이어일때 receiver 저장
                 """
                 seller=get_object_or_404(User, id=goods_obj.seller_id)
-                seller.temp_score = seller.temp_score + int(score)*0.4
+                seller.rating_score = seller.rating_score + int(score)*0.4
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':

@@ -29,6 +29,7 @@ class GoodsSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         if self.context["action"] == 'list':
             try:
+                print(GoodsImageSerializer(obj.goodsimage_set.all()[0]).data)
                 return GoodsImageSerializer(obj.goodsimage_set.all()[0]).data
             except IndexError:
                 return None
