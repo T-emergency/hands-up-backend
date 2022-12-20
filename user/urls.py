@@ -10,16 +10,10 @@ from . import views
 urlpatterns = [
 
     #user profile
-<<<<<<< HEAD
-    path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile_goods_view'),
-    # path('<int:user_id>/profile/', views.UserProfileReviewView.as_view(), name='user_profile_view'),
-    path('info/<int:user_id>/', views.UserInfoAPIView.as_view(), name = 'user_info'),
-=======
     path('<int:user_id>/', views.UserProfileView.as_view(), name = 'user_profile'),
     path('info/<int:user_id>/', views.UserInfoAPIView.as_view(), name = 'user_info'),
 
     # 회원 가입 
->>>>>>> 4faa716ac7147bea26df95447e2ddeca5ff1764b
     path('', UserView.as_view(), name='user_view'),
     path('auth/sms/', views.AuthSmsView.as_view(), name='auth_sms_view'),
     path('check/', views.UserViewSet.as_view({'get' : 'username_check'})),
