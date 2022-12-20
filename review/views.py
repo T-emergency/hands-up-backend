@@ -14,16 +14,53 @@ import datetime
 from datetime import timedelta
 class ReviewAPIView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
-    """
-    리뷰를 남기면서 상대방의 매너를 평가하는 기능
-    """
-    # TODO post하면 바로 점수반영
-
-
-    def post(self, request, goods_id):
+    def get(self, request):
         """
+        str(datetime.date.today())[:10]
+        판매자 정보에 들어갔을때 후기모음
+        필요한 것
+        받은사람은사람 이름, 사진 | 리뷰 작성자 이름 사진 시간 내용 | 리뷰의 개수
+        리뷰갖고와서 receiver하면 유저정보가 없을 수 있음 그럼 user에 만들어둔걸로 유저 불러오고
+        카운트 어떻게 할건지
+        지금은 사실 유저의 데이터 불러오는게 중요
+        일단 원래대로 이미지 공부하고 성공하면 유저따로
+        """
+        user_id=request.query_params.get('user_id','')
+        reviews=Review.objects.filter(receiver_id=user_id)
+        serializer=ReviewListSerializer(reviews, many=True)
+        bad_review_count=0
+        soso_review_count=0
+        good_review_count=0
+        excellent_review_count=0
+        for review in reviews:
+            if review.score==-20:
+                bad_review_count =+1
+            elif review.score==0:
+                soso_review_count =+1
+            elif review.score==3:
+                good_review_count =+1
+            elif review.score==5:
+                excellent_review_count =+1
+        data = {
+            "bad_review_count":bad_review_count,
+            "soso_review_count":soso_review_count,
+            "good_review_count":good_review_count,
+            "excellent_review_count":excellent_review_count,
+            "results":serializer.data
+        }
+        if len(reviews) > 1:
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_200_OK)
+
+    # TODO post하면 바로 점수반영
+    def post(self, request):
+        """
+        리뷰를 남기면서 상대방의 매너를 평가하는 기능
         판매글에서 대화창에 들어왔을때 로컬스토리지, 쿼리파라미터로 받음
         """
+
+        goods_id=request.query_params.get('goods_id','')
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data)
@@ -39,7 +76,7 @@ class ReviewAPIView(APIView):
                 author 셀러일때 review의 receiver 저장
                 """
                 buyer=get_object_or_404(User, id=goods_obj.buyer_id)
-                buyer.rating_score = buyer.rating_score + int(score)
+                buyer.temp_score = buyer.temp_score + int(score)*0.4
                 buyer.save()
                 serializer.save(author = request.user, receiver=buyer, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -49,12 +86,11 @@ class ReviewAPIView(APIView):
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.buyer_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             time_now=datetime.datetime.now()
-                            active_at=str(time_now+timedelta(weeks=3))
+                            react_at=str(time_now+timedelta(weeks=3))
                             buyer.is_active = 0
-                            buyer.react_at = active_at[:10]
+                            buyer.react_at = react_at[:10]
                             buyer.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
-                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너는 아니네요"}, status=status.HTTP_200_OK)
 
@@ -63,7 +99,7 @@ class ReviewAPIView(APIView):
                 author 바이어일때 receiver 저장
                 """
                 seller=get_object_or_404(User, id=goods_obj.seller_id)
-                seller.rating_score = seller.rating_score + int(score)
+                seller.temp_score = seller.temp_score + int(score)*0.4
                 seller.save()
                 serializer.save(author = request.user, receiver=seller, goods = goods_obj) # 포린키에 저장하는건 id str이 아니라 객체임 그래서 객체가져와서 저장해야한다.
                 if score != '-20':
@@ -73,54 +109,12 @@ class ReviewAPIView(APIView):
                         receiver_review_score = Review.objects.filter(receiver_id=goods_obj.seller_id).order_by('-created_at').values()[1]
                         if receiver_review_score['score'] == -20:
                             time_now=datetime.datetime.now()
-                            active_at=str(time_now+timedelta(weeks=3))
+                            react_at=str(time_now+timedelta(weeks=3))
                             seller.is_active = 0
-                            seller.react_at = active_at[:10]
+                            seller.react_at = react_at[:10]
                             seller.save()
                             return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
-                        return Response({"message":"비매너 사용자입니다"}, status=status.HTTP_200_OK)
                     except:
                         return Response({"message":"연속적인 비매너로 정지"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                
-
-
-
-class UserInfoAPIView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, user_id):
-        
-        """
-        판매자 정보에 들어갔을때 후기모음
-        """
-        # TODO 쿼리 수 줄이기
-        review_list=Review.objects.filter(receiver_id=user_id)
-        review_list_order_by = review_list.order_by('-created_at')
-        serializer=ReviewListSerializer(review_list_order_by, many=True)
-
-        bad_review_count = review_list.filter(score=-20).count()
-        soso_review_count = review_list.filter(score=0).count()
-        good_review_count = review_list.filter(score=3).count()
-        excellent_review_count = review_list.filter(score=5).count()
-
-        receiver=User.objects.get(id=user_id)
-        receiver_serializer=UserSerializer(receiver)
-
-        image=[]
-        for review in review_list_order_by:
-            author=UserSerializer(review.author).data['profile_image']
-            image.append(author)
-
-        data = {
-            "bad_review_count":bad_review_count,
-            "soso_review_count":soso_review_count,
-            "good_review_count":good_review_count,
-            "excellent_review_count":excellent_review_count,
-            "results":serializer.data,
-            "receiver":receiver_serializer.data,
-            "review_image":image
-        }
-
-        return Response(data, status=status.HTTP_200_OK)
-
-

@@ -1,21 +1,22 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+import environ
+DJANGO_SETTINGS_MODULE='handsup.settings'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+DP_MODE = False
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qmer4$u7sivk=1_m6_-zg&quo7=srdnwm+)p1quqyepo^b&^d1'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'secret') if DP_MODE else 'secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = True
+DEBUG = False if DP_MODE else True
 
-ALLOWED_HOSTS = ['*']
+
+ALLOWED_HOSTS = ['backend'] if DP_MODE else ['*']
 
 # goods(auction) user community review?
 # Application definition
@@ -29,7 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # service app
     'user',
     'review',
@@ -48,10 +49,10 @@ INSTALLED_APPS = [
 
     # crontab
     'django_crontab',
-    
+
     # Router
     'channels',
-    
+
 
 ]
 
@@ -61,42 +62,21 @@ ASGI_APPLICATION = 'handsup.asgi.application'
 
 WSGI_APPLICATION = 'handsup.wsgi.application'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+if DP_MODE:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [('redis', 6379)],
+            },
         },
-    },
-}
-
-# Channels
-# WSGI_APPLICATION = 'handsup.wsgi.application'
-# # Channels
-# ASGI_APPLICATION = 'handsup.asgi.application'
-
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         },
-#     },
-# }
-
-# Channels
-WSGI_APPLICATION = 'handsup.wsgi.application'
-
-ASGI_APPLICATION = 'handsup.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     "hosts": [('127.0.0.1', 6379)],
-        # },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 
 MIDDLEWARE = [
@@ -133,20 +113,35 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication', ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    
+
 }
 
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
+POSTGRES_DB = os.environ.get('POSTGRES_DB', '') if DP_MODE else False
+
+if POSTGRES_DB:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': POSTGRES_DB,
+            'USER': os.environ.get('POSTGRES_USER', ''),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+            'HOST': os.environ.get('POSTGRES_HOST', ''),
+            'PORT': os.environ.get('POSTGRES_PORT', ''),
+        }
+    }
+# 환경변수가 존재하지 않을 경우 sqlite3을 사용합니다.
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -179,19 +174,10 @@ USE_I18N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
-
-STATICFILES_DIRS = [BASE_DIR]
-
+STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -204,11 +190,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS
 # live server port 5500
-# CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:5500', 'http://localhost:5500','http://localhost:5501']
+CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr', 'http://43.200.179.49', 'http://backend.hands-up.co.kr']
 # 예외 없이 다 수락
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
-
+CORS_ALLOW_CREDENTIALS = False if DP_MODE else True
+CORS_ALLOW_ALL_ORIGINS = False if DP_MODE else True
+CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30000),
@@ -242,15 +228,19 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+CRONTAB_DJANGO_SETTINGS_MODULE='handsup.settings'
+#CRONTAB_DJANGO_SETTINGS_MODULE= os.path.join(BASE_DIR, 'handsup.settings')
 # crontab
 CRONJOBS = [
-    # 매주 월요일 새벽 1시 비매너 유저 제재
-    ('0 1 * * 1', 'review.cron.cron_user_ban', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    # 매주 월요일 새벽 1시 매너점수 반영, 비매너 유저 제재
+    ('0 1 * * 1', 'review.cron.anonymous_review', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
     # 매일 자정 비매너 유저 제재 풀기
-    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('0 0 * * *', 'review.cron.prison_break', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
+    # 4개월 마다 점수 리셋
+    ('0 0 1 */3 *', 'review.cron.rating_score_reset', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
     # 매분
-    ('* * * * *', 'goods.cron.get_goods_status', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
-    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')),
+    ('* * * * *', 'goods.cron.auction_start_and_end', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
+    # ('* * * * *', 'goods.cron.test', '>> '+os.path.join(BASE_DIR, 'handsup/log/cron.log')+' 2>&1 '),
 ]
 
 

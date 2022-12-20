@@ -13,7 +13,7 @@ from rest_framework import status, permissions
 
 from .models import Goods
 from user.models import User
-from .serializers import GoodsListSerializer, GoodsSerializer
+from .serializers import GoodsListSerializer, GoodsSerializer, GoodsImageSerializer
 
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -65,7 +65,7 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
-        print(self.request.data)
+        # print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,

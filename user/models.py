@@ -15,8 +15,18 @@ import json
 import datetime
 from django.utils import timezone
 
+from pathlib import Path
+import os
+import environ
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+env = environ.Env(DEBUG=(bool, True))
+environ.Env.read_env(
+    env_file=os.path.join(BASE_DIR, '.env')
+)
 class UserManager(BaseUserManager):
     def create_user(self, phone, username, password=None):
         """
@@ -73,6 +83,9 @@ class User(AbstractBaseUser):
     rating_score = models.SmallIntegerField(
         default=40,
     )
+    temp_score= models.SmallIntegerField(
+        default=0,
+    )
     is_active = models.BooleanField(default=True)
 
     is_admin = models.BooleanField(default=False)
@@ -124,34 +137,34 @@ class AuthSms(models.Model):
         self.send_sms()  # 인증번호가 담긴 SMS를 전송
 
     def send_sms(self):
-
-        url = ''
+        id = os.environ.get('NID').strip()
+        
+        url = f'https://sens.apigw.ntruss.com/sms/v2/services/{id}/messages'
         data = {
             "type": "SMS",
             "contentType" : "COMM",
-            "from": "01055411336",
+            "from": os.environ.get('NAVER_FROM_NUMBER').strip(),
             "messages":[{"to":self.phone_number, "subject" : "제목입니다"}],
             "content": "[핸즈업] 본인 확인 인증 번호 [{}]를 입력해주세요.".format(self.auth_number)
         }
         headers = {
             "Content-Type": "application/json",
             "x-ncp-apigw-timestamp" : str(int(time.time() * 1000)),
-            "x-ncp-iam-access-key": '',
+            "x-ncp-iam-access-key": os.environ.get('NAK').strip(),
             "x-ncp-apigw-signature-v2": self.make_signature(),
         }
         requests.post(url, data=json.dumps(data), headers=headers)
 
 
     def	make_signature(self):
+        id = os.environ.get('NID').strip()
         timestamp = int(time.time() * 1000)
         timestamp = str(timestamp)
-
-        access_key = ""				# access key id (from portal or Sub Account)
-        secret_key = ""				# secret key (from portal or Sub Account)
+        access_key = os.environ.get('NAK').strip()		
+        secret_key = os.environ.get('NSK').strip()
         secret_key = bytes(secret_key, 'UTF-8')
-
         method = "POST"
-        URI = ''
+        URI = f'/sms/v2/services/{id}/messages'
         # URI = "/photos/puppy.jpg?query1=&query2"
 
         message = method + " " + URI + "\n" + timestamp + "\n" + access_key

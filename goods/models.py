@@ -5,6 +5,9 @@ from chat.models import TradeChatRoom
 
 # validators
 from django.core.validators import validate_image_file_extension
+from django.core.exceptions import ValidationError
+
+
 
 class Goods(models.Model):
     class Meta:
@@ -31,7 +34,6 @@ class Goods(models.Model):
 class GoodsImage(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='goods/',validators=[validate_image_file_extension])
-
 
     class Meta:
         db_table = "GoodsImage"
