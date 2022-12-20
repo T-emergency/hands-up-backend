@@ -29,6 +29,7 @@ class GoodsSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         if self.context["action"] == 'list':
             try:
+                print(GoodsImageSerializer(obj.goodsimage_set.all()[0]).data)
                 return GoodsImageSerializer(obj.goodsimage_set.all()[0]).data
             except IndexError:
                 return None
@@ -50,9 +51,9 @@ class GoodsSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # 바이트 기준
-        file_size= 34000
-        required_width = 1000
-        required_height = 1000
+        file_size= 500000
+        required_width = 2000
+        required_height = 2000
         image_set = self.context['request'].FILES.getlist('images')
         for i in image_set:
             width, height = get_image_dimensions(i)

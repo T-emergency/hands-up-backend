@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 from datetime import timedelta
-import environ
+# import environ
 DJANGO_SETTINGS_MODULE='handsup.settings'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -192,9 +192,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # live server port 5500
 CORS_ORIGIN_WHITELIST = ['http://hands-up.co.kr', 'http://43.200.179.49', 'http://backend.hands-up.co.kr']
 # 예외 없이 다 수락
-CORS_ALLOW_CREDENTIALS = False if DP_MODE else True
-CORS_ALLOW_ALL_ORIGINS = False if DP_MODE else True
-CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+# CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30000),

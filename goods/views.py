@@ -75,7 +75,7 @@ class GoodsView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
-
+        return Response("여기",status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['GET'])
     def recommend_goods(self, request):
