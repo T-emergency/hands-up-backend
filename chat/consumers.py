@@ -128,7 +128,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message' : '주최자는 입찰을 못 합니다.'
             }
             await self.channel_layer.group_send(
-              self.room_group_name,
+              self.alert_room_name,
               {
                   'type': 'chat_message',
                   'response': json.dumps(response)
@@ -142,7 +142,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
           except ValueError:
             return False
           
-          await self.set_high_price(goods, user_id, money)
+          is_high = await self.set_high_price(goods, user_id, money)
+          if not is_high:
+            response = {
+            'response_type' : "alert",
+            'message' : '현재 입찰가보다 낮거나 종료된 경매입니다.'
+            }
+            return await self.channel_layer.group_send(
+              self.alert_room_name,
+              {
+                  'type': 'chat_message',
+                  'response': json.dumps(response)
+
+              }
+            )
 
           response = {
             'response_type' : "bid",
@@ -197,12 +210,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_high_price(self, goods:object, user_id, money):
 
-        if goods.high_price > money: # 방어코드
+        if goods.high_price > money or goods.status != True: # 방어코드
           return False
 
         goods.high_price = money
         goods.buyer_id = user_id
         goods.save()
+        return True
           
 
     @database_sync_to_async
@@ -387,3 +401,32 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       return obj
     
+
+
+class AlramConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+
+        if self.scope.get('user').is_authenticated:
+
+          user = self.scope.get('user')
+          self.alram_name = 'alram_%s' % user.id
+
+          # 해당 로그인 유저 그룹 생성 추가
+          await self.channel_layer.group_add(
+            self.alram_name,
+            self.channel_name
+          )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.alram_name,
+            self.channel_name
+        )
+
+    async def chat_message(self, event):
+        await self.send(text_data=event['response'])

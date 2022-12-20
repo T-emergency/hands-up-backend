@@ -1,14 +1,15 @@
 from pathlib import Path
 import os
 from datetime import timedelta
-import environ
+# import environ
 DJANGO_SETTINGS_MODULE='handsup.settings'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-DP_MODE = False
+
+DP_MODE = True # 배포 모드 설정 Deploy_Mode
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'secret') if DP_MODE else 'secret'
 
