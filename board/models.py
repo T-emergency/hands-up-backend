@@ -4,8 +4,8 @@ from user.models import User
 
 class FreeArticle(models.Model):
 
-    title = models.CharField('제목', null=True, max_length=50)
-    content = models.TextField('내용', null=True)
+    title = models.CharField('제목', max_length=20)
+    content = models.TextField('내용', null=True, blank=True, max_length=1000)
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
     updated_at = models.DateTimeField('수정 시간', auto_now=True)
     image = models.ImageField(upload_to='', null=True, blank=True)
@@ -22,8 +22,8 @@ class FreeArticle(models.Model):
 
 class ReportArticle(models.Model):
 
-    title = models.CharField('제목', null=True, max_length=50)
-    content = models.TextField('내용', null=True)
+    title = models.CharField('제목', max_length=20)
+    content = models.TextField('내용', null=True, blank=True, max_length=1000)
     created_at = models.DateTimeField('생성 시간', auto_now_add=True)
     updated_at = models.DateTimeField('수정 시간', auto_now=True)
     image = models.ImageField(upload_to='', null=True, blank=True)
