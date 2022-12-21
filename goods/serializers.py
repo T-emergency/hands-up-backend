@@ -50,8 +50,8 @@ class GoodsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # 바이트 기준
         file_size= 5242880 # 5MB
-        required_width = 1000
-        required_height = 1000
+        required_width = 2000
+        required_height = 2000
         image_set = self.context['request'].FILES.getlist('images')
         for i in image_set:
             width, height = get_image_dimensions(i)
@@ -103,3 +103,16 @@ class GoodsListSerializer(serializers.ModelSerializer):
         model = Goods
         fields = '__all__'
         read_only_fields = ['like', 'status']
+
+
+class TradeInfoSerializer(serializers.ModelSerializer):
+    seller = UserSerializer()
+    buyer = UserSerializer()
+    wait_cnt = serializers.SerializerMethodField()
+
+    def get_wait_cnt(self, obj):
+        return obj.trade_room.trademessage.filter(is_read = False).count()
+
+    class Meta:
+        model = Goods
+        fields = '__all__'
