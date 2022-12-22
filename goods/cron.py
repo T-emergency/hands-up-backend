@@ -2,7 +2,12 @@ from .models import Goods
 from chat.models import TradeChatRoom
 from datetime import date, datetime, timedelta
 from django.db.models import Q
-# import pytz
+
+# alram section
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+import json
+
 
 def auction_start_and_end():
     today = date.today()
@@ -33,11 +38,12 @@ def auction_start_and_end():
             goods.status = False
             goods.save()
 
-    goods_list = Goods.objects.filter(status=False, trade_room=None,buyer__isnull=False)
-    
+    goods_list = Goods.objects.filter(status=False, trade_room=None,buyer__isnull=False).select_related('buyer')
+    layer = get_channel_layer()
     if goods_list.exists():
         for goods in goods_list:
             room = TradeChatRoom.objects.create()
+            async_to_sync(layer.group_send)(f'alram_{goods.buyer.id}', {'type': 'chat_message', 'response': json.dumps({'response_type': 'alram', 'message': '낙찰됨'})})
             goods.trade_room = room
             goods.save()
             

@@ -35,7 +35,6 @@ class ReviewAPIView(APIView):
                 good_review_count +=1
             elif review.score==5:
                 excellent_review_count +=1
-
         data = {
             "bad_review_count":bad_review_count,
             "soso_review_count":soso_review_count,

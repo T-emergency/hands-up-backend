@@ -427,3 +427,6 @@ class AlramConsumer(AsyncWebsocketConsumer):
             self.alram_name,
             self.channel_name
         )
+
+    async def chat_message(self, event):
+        await self.send(text_data=event['response'])
