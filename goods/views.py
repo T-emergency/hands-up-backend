@@ -117,7 +117,7 @@ class UserGoodsView(ModelViewSet):
         elif st=='':
             queryset = Goods.objects.filter(seller_id=self.kwargs['user_id']).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
         else:
-            queryset = Goods.objects.filter(status=status[st]).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
+            queryset = Goods.objects.filter(seller_id=self.kwargs['user_id'], status=status[st]).prefetch_related('like','goodsimage_set', 'auctionparticipant_set').select_related('seller', 'buyer')
         return queryset
 
 

@@ -259,4 +259,5 @@ my_settings.py
 # migrations
 .vscode/
 venv2/
+requirement-linux.txt
 media/
