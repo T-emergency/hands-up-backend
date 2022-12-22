@@ -24,10 +24,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile_image = serializers.SerializerMethodField()
+    # profile_image = serializers.SerializerMethodField()
 
-    def get_profile_image(self, obj):
-        return obj.profile_image.url
     class Meta:
         model = User
         # fields = '__all__'#['username', 'password','profile_image']
@@ -37,8 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
         }
         exclude = ('last_login', 'phone', 'kakao_id', 'temp_score', 'password')
 
+    # def get_profile_image(self, obj):
+    #     return obj.profile_image.url
 
     def create(self, validated_data):
+
         user  = super().create(validated_data) # 저장하고
         password = user.password
         user.set_password(password) # 지정하고

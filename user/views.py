@@ -50,6 +50,7 @@ class UserView(APIView):
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            print(serializer.data)
 
             return Response({'msg': '저장완료'}, status=status.HTTP_200_OK)
         else:
@@ -154,6 +155,7 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            print("저장성공")
             return Response({'msg': '저장완료'}, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
