@@ -65,7 +65,6 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
-        # print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,
@@ -102,7 +101,6 @@ class UserGoodsView(ModelViewSet):
 
     def get_queryset(self):
         st = self.request.query_params.get('status', '')
-        print(st)
 
         status = {'null':None, 'true':True, 'false' : False, 'buy' : 'buy', 'sell' : 'sell', 'like' : 'like'}
 
