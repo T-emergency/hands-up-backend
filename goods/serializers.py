@@ -50,14 +50,15 @@ class GoodsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # 바이트 기준
         file_size= 5242880 # 5MB
-        required_width = 1000
-        required_height = 1000
+        required_width = 5000
+        required_height = 5000
         image_set = self.context['request'].FILES.getlist('images')
         for i in image_set:
             width, height = get_image_dimensions(i)
             if i.size > file_size:
                 raise ValidationError("사진용량 초과")
             elif width > required_width or height > required_height:
+                print(width,height)
                 raise ValidationError("사진크기 초과")
         return data
 
