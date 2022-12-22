@@ -65,7 +65,6 @@ class GoodsView(ModelViewSet):
 
 
     def get_serializer_context(self):
-        # print(self.request.data)
         return {
             'request': self.request,
             'format': self.format_kwarg,
