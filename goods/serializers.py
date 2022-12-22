@@ -8,7 +8,7 @@ from user.serializers import UserSerializer
 from .models import Goods, GoodsImage
 from rest_framework.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
-
+from datetime import datetime
 
 
 class GoodsImageSerializer(serializers.ModelSerializer):
@@ -109,10 +109,36 @@ class TradeInfoSerializer(serializers.ModelSerializer):
     seller = UserSerializer()
     buyer = UserSerializer()
     wait_cnt = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    last_message = serializers.SerializerMethodField()
 
     def get_wait_cnt(self, obj):
-        return obj.trade_room.trademessage.filter(is_read = False).count()
+        msg = obj.trade_room.trademessage_set.all()
+        st_idx = len(msg)-10 if len(msg)-10 > 0 else 0
+        return len([ 0 for message in msg[st_idx:] if message.author_id != self.context['request'].user.id and message.is_read == False])
+
+    def get_image(self, obj):
+        try:
+            return obj.goodsimage_set.all()[0].image.url
+        except IndexError:
+            return None
+    def get_last_message(self, obj):
+        try:
+            # last_message = obj.trade_room.trademessage_set.order_by('-created_at')[0]
+            last_message = obj.trade_room.trademessage_set.all()
+            last_message = last_message[len(last_message)-1]
+            data = {
+                'message' : last_message.content,
+                'created_at' : last_message.created_at
+            }
+            return data
+        except IndexError:
+            data = {
+                'message' : '거래를 시작해 주세요!',
+                'created_at' : datetime.now()
+            }
+            return data
 
     class Meta:
         model = Goods
-        fields = '__all__'
+        fields = ['id', 'seller', 'buyer', 'image', 'wait_cnt', 'title', 'high_price', 'last_message']

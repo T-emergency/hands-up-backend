@@ -10,7 +10,7 @@ from channels.auth import get_user_model
 # models
 from goods.models import Goods
 from user.models import User
-from chat.models import AuctionParticipant, TradeMessage
+from chat.models import AuctionParticipant, TradeChatRoom, TradeMessage
 
 from chat.serializers import TradeMessageSerializer
 from goods.serializers import GoodsSerializer
@@ -280,9 +280,23 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         )
           
         await self.accept()
-      else:
-        # await self.disconnect()
-        return False
+        
+        image = await self.get_goods_image(goods_id)
+        image = image.image.url if image else None
+        response = {
+          'response_type' : 'goods_info',
+          'image' : image,
+          'high_price' : goods.high_price,
+          'title' : goods.title,
+          'goods_id' : goods.id,
+        }
+        await self.channel_layer.group_send(
+          self.room_group_name,
+          {
+            'type': 'chat_message',
+            'response': json.dumps(response)
+          }
+        )
 
 
     async def disconnect(self, close_code):
@@ -292,15 +306,6 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        
-
-        # if self.scope.get('user').is_authenticated:
-
-        #   await self.channel_layer.group_discard(
-        #     self.alert_room_name,
-        #     self.channel_name
-        #   )
-
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -340,9 +345,31 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'response': json.dumps(response)
-
             }
-      )
+        )
+
+        response = {
+          'response_type' : 'chat_alram',
+          'message': message,
+          'sender': user.id,
+          'sender_name': user.username,
+          'goods_id': goods_id,
+          # 'time': datetime.now(),
+        } 
+        await self.channel_layer.group_send(
+          f'alram_{goods.buyer_id}',
+          {
+            'type': 'chat_message',
+            'response': json.dumps(response)
+          }
+        )
+        await self.channel_layer.group_send(
+          f'alram_{goods.seller_id}',
+          {
+            'type': 'chat_message',
+            'response': json.dumps(response)
+          }
+        )
 
 
     # Receive message from room group
@@ -362,7 +389,6 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
           now_time = f"오후 {now_time}"
 
         return now_time
-          
 
     @database_sync_to_async
     def get_user_obj(self, user_id):
@@ -374,7 +400,6 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
 
       return obj
 
-
     @database_sync_to_async
     def get_goods_obj(self, goods_id):
 
@@ -382,24 +407,33 @@ class ChatConsumerDirect(AsyncWebsocketConsumer):
         obj = Goods.objects.get(pk = goods_id)
       except Goods.DoesNotExist:
         return False
+      except TradeChatRoom.DoesNotExist:
+        return False
       return obj
-    
-
-    @database_sync_to_async
-    def get_trade_message_obj(self, trade_room_id):
-
-      obj = TradeMessage.objects.filter(trade_room_id = trade_room_id)
-      serializer = TradeMessageSerializer(obj,many=True)
-
-      return serializer.data
-    
     
     @database_sync_to_async
     def create_trade_message_obj(self, user_id, message, trade_room_id):
 
       obj = TradeMessage.objects.create(author_id=user_id, content=message, trade_room_id = trade_room_id)
+      obj.trade_room.save()
 
       return obj
+
+    @database_sync_to_async
+    def get_goods_image(self, goods_id):
+      """
+      get_goods_obj 메서드에서 처리해도 되나
+      상품의 이미지;goods.goodsimage_set에 접근하려면 쿼리를 한 번 더 요청을 합니다.
+      로그를 가져올 때 한 번만 필요하기에 매번 쓰이는 get_goods_obj보다는 따로 만드는 것이 좋다 판다.
+      """
+      try:
+        obj = Goods.objects.prefetch_related('goodsimage_set').get(pk = goods_id)
+        image = obj.goodsimage_set.all()[0]
+      except Goods.DoesNotExist:
+        return False
+      except IndexError:
+        return None
+      return image
     
 
 
