@@ -186,40 +186,6 @@ class UserViewSet(viewsets.ViewSet):
         user = request.user
         return Response({'result':'d'}, status=status.HTTP_200_OK)
 
-class UserProfileReviewView(APIView):
-    def get(self, request, user_id):
-            
-            """
-            내 정보에 들어갔을때 후기모음
-            """
-            review_list=Review.objects.filter(receiver_id=user_id)
-            review_list_order_by = review_list.order_by('-created_at')
-            serializer=ReviewListSerializer(review_list_order_by, many=True)
-
-            bad_review_count = review_list.filter(score=-20).count()
-            soso_review_count = review_list.filter(score=0).count()
-            good_review_count = review_list.filter(score=3).count()
-            excellent_review_count = review_list.filter(score=5).count()
-
-            receiver=User.objects.get(id=user_id)
-            receiver_serializer=UserSerializer(receiver)
-
-            image=[]
-            for review in review_list_order_by:
-                author=UserSerializer(review.author).data['profile_image']
-                image.append(author)
-
-            data = {
-                "bad_review_count":bad_review_count,
-                "soso_review_count":soso_review_count,
-                "good_review_count":good_review_count,
-                "excellent_review_count":excellent_review_count,
-                "results":serializer.data,
-                "receiver":receiver_serializer.data,
-                "review_image":image
-            }
-
-            return Response(data, status=status.HTTP_200_OK)
             
 class UserInfoAPIView(APIView):
     def get(self, request, user_id):
