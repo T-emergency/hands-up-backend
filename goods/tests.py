@@ -12,8 +12,8 @@ import tempfile
 def get_temporary_image(temp_file):
     size=(1,1)
     color=(255,0,0,0)
-    image=Image.new("RGBA",size,color)
-    image.save(temp_file,'png')
+    images=Image.new("RGBA",size,color)
+    images.save(temp_file,'png')
     return temp_file
 
 class GoodsCreateTest(APITestCase):
@@ -22,69 +22,46 @@ class GoodsCreateTest(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        # Goods.objects.create(
-        #     id=1,
-        #     # "title":"test",
-        #     # "content":"test",
-        #     # "category":"기타",
-        #     # "status":"0",
-        #     predict_price=15000,
-        #     start_price=10000,
-        #     # "high_price":"0",
-        #     start_date='2022-12-25',
-        #     start_time='1159',
-        #     seller_id=1,
-        # )
-        # User.objects.create(
-        #     id=1
-        # )
-        # cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
-        # cls.user=User.objects.create_user('010','test','!1testtest')
+        cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
+        cls.user=User.objects.create_user('010','test','!1testtest')
         cls.goods_data={
             "title":"test",
             "content":"test",
             "category":"기타",
-            # "status":"0",
             "predict_price":"15000",
             "start_price":"10000",
-            # "high_price":"0",
             "start_date":"2022-12-25",
             "start_time":"11:59"
-            # "seller_id":0
             }
 
     def setUp(self):
-        self.user_data={'phone':'010','username':'test','password':'!1testtest'}
-        self.user=User.objects.create_user('010','test','!1testtest')
-        # self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
+        self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
 
     def test_create_goods(self):
-        access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
+        # access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
         response = self.client.post(
             path=reverse("goods_view"),
-            HTTP_AUTHORIZATION="Bearer"+" "+access_token,
             data=self.goods_data,
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
         )
         print(response.data)
-        print(access_token)
+        print("만들기",self.access_token)
         self.assertEqual(response.status_code,201)
 
-    def test_create_goods_image(self):
+    def test_create_goods_with_image(self):
         # 임시 이미지파일 생성
-        temp_file=tempfile.NamedTemporaryFile()
+        temp_file=tempfile.NamedTemporaryFile() # 파이썬 임시파일 만듬
         temp_file.name="image.png"
         image_file=get_temporary_image(temp_file)
         image_file.seek(0)
         self.goods_data["images"]=image_file
-        access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
         # 전송
         response=self.client.post(
             path=reverse("goods_view"),
             data=encode_multipart(data=self.goods_data,boundary=BOUNDARY), #굿즈 데이터에 이미지 추가
             content_type=MULTIPART_CONTENT,
-            HTTP_AUTHORIZATION="Bearer"+" "+access_token,
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
             )
-        print("이미지",response.data)
         self.assertEqual(response.status_code,201)
         
 # class GoodsCreateTest(APITestCase):
