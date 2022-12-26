@@ -105,6 +105,13 @@ class GoodsListTest(APITestCase):
             start_date='2022-12-29',
             seller_id=1
             )
+        cls.goods=Goods.objects.create(
+            id=2,
+            predict_price=1,
+            start_price=1,
+            start_date='2022-12-29',
+            seller_id=1
+            )
 
     def setUp(self):
         self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
@@ -114,6 +121,7 @@ class GoodsListTest(APITestCase):
             '/goods/',
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
         )
+        # print(response.data)
         self.assertEqual(response.status_code,200)
 
 
@@ -140,6 +148,35 @@ class GoodsDetailTest(APITestCase):
     def test_goods_detail(self):
         response = self.client.get(
             '/goods/1/',
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        )
+        # print(response)
+        # print(response.data)
+        self.assertEqual(response.status_code,200)
+
+
+class GoodsRecommendTest(APITestCase):
+    """
+    goods detail
+    """
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
+        cls.user=User.objects.create_user('010','test','!1testtest')
+        cls.goods=Goods.objects.create(
+            id=1,
+            predict_price=1,
+            start_price=1,
+            start_date='2022-12-29',
+            seller_id=1
+            )
+
+    def setUp(self):
+        self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
+
+    def test_goods_recommend(self):
+        response = self.client.get(
+            path=reverse('goods_recommend'),
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
         )
         self.assertEqual(response.status_code,200)
