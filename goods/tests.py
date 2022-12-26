@@ -18,7 +18,7 @@ def get_temporary_image(temp_file):
 
 class GoodsCreateTest(APITestCase):
     """
-    판매상품 등록
+    goods 등록
     """
     @classmethod
     def setUpTestData(cls):
@@ -38,14 +38,11 @@ class GoodsCreateTest(APITestCase):
         self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
 
     def test_create_goods(self):
-        # access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
         response = self.client.post(
             path=reverse("goods_view"),
             data=self.goods_data,
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
         )
-        print(response.data)
-        print("만들기",self.access_token)
         self.assertEqual(response.status_code,201)
 
     def test_create_goods_with_image(self):
@@ -63,39 +60,30 @@ class GoodsCreateTest(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
             )
         self.assertEqual(response.status_code,201)
-        
-# class GoodsCreateTest(APITestCase):
-#     """
-#     판매상품 등록
-#     """
-#     def setUp(self):
-#         self.user_data={'phone':'010','username':'test','password':'!1testtest'}
-#         self.goods_data={
-#             "title":"test",
-#             "content":"test",
-#             "category":"기타",
-#             "status":"0",
-#             "predict_price":"15000",
-#             "start_price":"10000",
-#             "high_price":"0",
-#             "start_date":"2022-12-25",
-#             "start_time":"11:59",
-#         }
-#         self.user=User.objects.create_user('010','test','!1testtest')
-#         self.access_token=self.client.post(reverse('token_obtain'), self.data).data['access']
-#     def test_create
-            #     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sell_goods")
-    # buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buy_goods", null=True, blank=True)
-    # trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE, null=True, blank=True)
 
-    # title = models.CharField(max_length=256)
-    # content = models.TextField()
-    # category = models.CharField(max_length=32)
-    # status = models.BooleanField(null=True, blank =True)
-    # predict_price = models.IntegerField()
-    # start_price = models.IntegerField()
-    # high_price = models.IntegerField(default=0 ,null=True, blank=True)
-    # start_date = models.DateField()
-    # start_time = models.CharField(max_length=5)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
+
+class GoodsLikeTest(APITestCase):
+    """
+    goods 좋아요
+    """
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
+        cls.user=User.objects.create_user('010','test','!1testtest')
+        cls.goods=Goods.objects.create(
+            id=1,
+            predict_price=1,
+            start_price=1,
+            start_date='2022-12-29',
+            seller_id=1
+            )
+
+    def setUp(self):
+        self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
+
+    def test_goods_like(self):
+        response = self.client.get(
+            '/goods/like/1/',
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code,200)
