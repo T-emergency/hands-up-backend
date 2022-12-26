@@ -87,3 +87,32 @@ class GoodsLikeTest(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
         )
         self.assertEqual(response.status_code,200)
+
+
+
+class GoodsListTest(APITestCase):
+    """
+    goods list
+    """
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
+        cls.user=User.objects.create_user('010','test','!1testtest')
+        cls.goods=Goods.objects.create(
+            id=1,
+            predict_price=1,
+            start_price=1,
+            start_date='2022-12-29',
+            seller_id=1
+            )
+
+    def setUp(self):
+        self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
+
+    def test_goods_list(self):
+        response = self.client.get(
+            '/goods/',
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code,200)
+
