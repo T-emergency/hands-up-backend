@@ -182,7 +182,7 @@ class GoodsRecommendTest(APITestCase):
         self.assertEqual(response.status_code,200)
 
 
-class GoodsUserGoodsViewTest(APITestCase):
+class UserGoodsViewTest(APITestCase):
     """
     user goods view 
     """

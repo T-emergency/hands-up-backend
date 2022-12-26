@@ -1,36 +1,34 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from user.models import User
+from goods.models import Goods
 
-# class ReviewCreateTest(APITestCase):
-#     """
-#     리뷰작성
-#     """
-#     def setUp(self):
-#         self.user_data={'phone':'010','username':'test','password':'!1testtest'}
-#         self.goods_data={
-            
-#         }
-#         self.user=User.objects.create_user('010','test','!1testtest')
+class ReviewCreateTest(APITestCase):
+    """
+    리뷰작성
+    """
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_data={'phone':'010','username':'test','password':'!1testtest'}
+        cls.review_data={'score':'5','content':'test','goods':'1','author':'1','receiver':'2'}
+        cls.user1=User.objects.create_user('010','test','!1testtest')
+        cls.user2=User.objects.create_user('011','test2','!1testtest')
+        cls.goods=Goods.objects.create(
+            id=1,
+            predict_price=1,
+            start_price=1,
+            start_date='2022-12-29',
+            seller_id=1,
+            buyer_id=2
+            )
 
-#         self.access_token=self.client.post(reverse('token_obtain'), self.data).data['access']
+    def setUp(self):
+        self.access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
 
-#     def test_registration(self):
-#         pass
-
-
-    #     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sell_goods")
-    # buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buy_goods", null=True, blank=True)
-    # trade_room = models.ForeignKey(TradeChatRoom, on_delete=models.CASCADE, null=True, blank=True)
-
-    # title = models.CharField(max_length=256)
-    # content = models.TextField()
-    # category = models.CharField(max_length=32)
-    # status = models.BooleanField(null=True, blank =True)
-    # predict_price = models.IntegerField()
-    # start_price = models.IntegerField()
-    # high_price = models.IntegerField(default=0 ,null=True, blank=True)
-    # start_date = models.DateField()
-    # start_time = models.CharField(max_length=5)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # like = models.ManyToManyField(User, related_name='like_goods', blank=True, null=True)
+    def test_review_post(self):
+        response = self.client.post(
+            '/review/?goods_id=1',
+            data=self.review_data,
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code,200)
