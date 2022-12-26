@@ -74,7 +74,7 @@ class GoodsView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
-        return Response("여기",status=status.HTTP_201_CREATED)
+        return Response("작성완료",status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['GET'])
     def recommend_goods(self, request):
@@ -88,7 +88,7 @@ class GoodsView(ModelViewSet):
 
 class UserGoodsView(ModelViewSet):
     serializer_class = GoodsSerializer
-    permission_classes = [IsAuthorOrReadOnly,]
+    # permission_classes = [IsAuthorOrReadOnly,]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
     filterset_fields = ["category"]

@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
+from .models import User
 from rest_framework.authtoken.models import Token
 from django.db import models
-from .models import User
 
 class UserRegistrationTest(APITestCase):
     """
@@ -36,6 +36,7 @@ class LoginUserTest(APITestCase):
         access_token=self.client.post(reverse('token_obtain'), self.data).data['access']
         response=self.client.get(
             path=reverse('user_view'),
-            HTTP_AUTHORIZATION=f"Bearer{access_token}"
+            HTTP_AUTHORIZATION=f"Bearer {access_token}"
         )
+        print(response.data)
         self.assertEqual(response.status_code,200)

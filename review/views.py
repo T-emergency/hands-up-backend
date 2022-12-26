@@ -14,7 +14,6 @@ import datetime
 from datetime import timedelta
 
 class ReviewAPIView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         """
         판매자 정보에 들어갔을때 후기모음
@@ -55,6 +54,7 @@ class ReviewAPIView(APIView):
         goods_obj=Goods.objects.get(id=goods_id)
         review_exist=Review.objects.filter(goods_id=goods_id, author_id=request.user.id).exists()
         serializer = ReviewCreateSerializer(data=request.data, context={'request':request})
+
         score=(request.data.get('score'))
         if review_exist==True:
             """
