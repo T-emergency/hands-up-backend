@@ -75,17 +75,16 @@ class GoodsCreateTest(APITestCase):
         temp_file.name="image.png"
         image_file=get_temporary_image(temp_file)
         image_file.seek(0)
-        self.goods_data["image"]=image_file
+        self.goods_data["images"]=image_file
         access_token=self.client.post(reverse('token_obtain'), self.user_data).data['access']
         # 전송
         response=self.client.post(
             path=reverse("goods_view"),
-            data=encode_multipart(data=self.goods_data,boundary=BOUNDARY),
+            data=encode_multipart(data=self.goods_data,boundary=BOUNDARY), #굿즈 데이터에 이미지 추가
             content_type=MULTIPART_CONTENT,
             HTTP_AUTHORIZATION="Bearer"+" "+access_token,
             )
-        # print(response.data)
-        # print(self.access_token)
+        print("이미지",response.data)
         self.assertEqual(response.status_code,201)
         
 # class GoodsCreateTest(APITestCase):
