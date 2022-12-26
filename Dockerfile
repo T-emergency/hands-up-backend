@@ -21,13 +21,16 @@ RUN apt-get install -y cron
 COPY ./requirements.txt .
 
 COPY ./ /app/
+
+#RUN pip install --upgrade pip
 # 프로젝트 실행에 필요한 패키지들을 설치합니다.
 RUN pip install --no-cache-dir -r requirements.txt
 
 # RUN service cron start
-#ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # gunicorn과 postgresql을 사용하기 위한 패키지를 설치합니다.
+RUN pip install django-environ
 RUN pip install gunicorn psycopg2
 
 

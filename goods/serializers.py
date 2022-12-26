@@ -127,7 +127,9 @@ class TradeInfoSerializer(serializers.ModelSerializer):
         try:
             # last_message = obj.trade_room.trademessage_set.order_by('-created_at')[0]
             last_message = obj.trade_room.trademessage_set.all()
-            last_message = last_message[len(last_message)-1]
+            idx = len(last_message)-1
+            idx = idx if idx >= 0 else 0
+            last_message = last_message[0]
             data = {
                 'message' : last_message.content,
                 'created_at' : last_message.created_at

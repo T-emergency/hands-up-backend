@@ -110,7 +110,7 @@ class ChatViewSet(ViewSet):
     특정 방의 요청이 'retrive' 오면 채팅방의 채팅들을 보내줍니다.
     """
     permission_classes = [IsTrader,]
-    # queryset = TradeMessage.objects.all().select_related('author', 'trade_room')
+    
     def get_permissions(self):
         if self.action == 'list':
             return [permissions.IsAuthenticated(),]
@@ -118,11 +118,13 @@ class ChatViewSet(ViewSet):
 
     def list(self, request):
         user_id = self.request.user.id
+        print(user_id)
         queryset = Goods.objects.filter(status=False, buyer__isnull=False) \
                                 .filter( Q(buyer_id=user_id) | Q(seller_id=user_id)) \
                                 .annotate(updated_at=F("trade_room__updated_at")).order_by('-updated_at') \
                                 .select_related('seller', 'buyer', 'trade_room') \
                                 .prefetch_related('trade_room__trademessage_set', 'goodsimage_set')
+        print(queryset)
         serializer = TradeInfoSerializer(queryset, many=True, context={'request':request})
         return Response(serializer.data)
     
@@ -132,7 +134,7 @@ class ChatViewSet(ViewSet):
         TradeMessage.objects.filter(trade_room_id=goods.trade_room.id).exclude(author_id = request.user.id).update(
             is_read=True
         )
-        queryset = TradeMessage.objects.filter(trade_room_id=goods.trade_room.id).select_related('author')
+        queryset = TradeMessage.objects.filter(trade_room_id=goods.trade_room.id).select_related('author').order_by('created_at')
         serializer = TradeMessageSerializer(queryset, many=True)
         
         return Response(serializer.data)
