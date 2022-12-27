@@ -4,13 +4,14 @@ from datetime import datetime
 
 # channels
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
-from channels.auth import get_user_model
+from asgiref.sync import async_to_sync
 
 # models
-from goods.models import Goods
+from goods.models import Bid, Goods
 from user.models import User
-from chat.models import AuctionParticipant, TradeChatRoom, TradeMessage
+from chat.models import AuctionMessage, AuctionParticipant, TradeChatRoom, TradeMessage
 
 from chat.serializers import TradeMessageSerializer
 from goods.serializers import GoodsSerializer
@@ -35,13 +36,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
           goods_id = self.scope['url_route']['kwargs']['goods_id']
           user = self.scope.get('user')
-          self.alert_room_name = 'alert_%s' % user.id
+          # self.alert_room_name = 'alert_%s' % user.id
 
-          # 해당 로그인 유저 그룹 생성 추가
-          await self.channel_layer.group_add(
-            self.alert_room_name,
-            self.channel_name
-          )
+          # # 해당 로그인 유저 그룹 생성 추가
+          # await self.channel_layer.group_add(
+          #   self.alert_room_name,
+          #   self.channel_name
+          # )
 
           is_first, participants_count = await self.enter_or_out_auction(user.id , goods_id, is_enter = True)
 
@@ -50,7 +51,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
               'response_type' : "enter",
               'sender': user.id,
               'sender_name': user.username,
-              'participants_count' : participants_count
+              'participants_count' : participants_count,
+              'user_id' : user.id
             }
             await self.channel_layer.group_send(
               self.room_group_name,
@@ -72,10 +74,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         if self.scope.get('user').is_authenticated:
 
-          await self.channel_layer.group_discard(
-            self.alert_room_name,
-            self.channel_name
-          )
+          # await self.channel_layer.group_discard(
+          #   self.alert_room_name,
+          #   self.channel_name
+          # )
 
           user = self.scope.get('user')
           goods_id = self.scope['url_route']['kwargs']['goods_id']
@@ -83,7 +85,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
           response = {
             'response_type' : "out",
-            'participants_count' : participants_count
+            'participants_count' : participants_count,
+            'user_id' : user.id
           }
 
           await self.channel_layer.group_send(
@@ -106,20 +109,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 로그인한 유저에게만 alert메시지 전송
         if '' in [user_id, goods_id, is_money]:
           return await self.channel_layer.group_send(
-              self.alert_room_name,
+              f'alram_{user_id}',
               {
                   'type': 'chat_message',
-                  'response': json.dumps({'response_type' : 'alert', 'message' : '로그인 하셨나용'})
+                  'response': json.dumps({'response_type' : 'alert', 'message' : '올바르지 않은 접근'})
 
               }
             )
 
         user = await self.get_user_obj(user_id)
 
-        if is_money == True:
+        if is_money:
           goods = await self.get_goods_obj(goods_id)
 
-          if goods == False: # 방어 코드 (상품 x)
+          if not goods: # 방어 코드 (상품 x)
             return False
 
           if goods.seller_id == user_id :#or goods.status != True: # 방어코드 (주최자가 경매입찰, 상품 상태)
@@ -128,7 +131,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message' : '주최자는 입찰을 못 합니다.'
             }
             await self.channel_layer.group_send(
-              self.alert_room_name,
+              f'alram_{user_id}',
               {
                   'type': 'chat_message',
                   'response': json.dumps(response)
@@ -148,14 +151,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'response_type' : "alert",
             'message' : '현재 입찰가보다 낮거나 종료된 경매입니다.'
             }
-            return await self.channel_layer.group_send(
-              self.alert_room_name,
-              {
-                  'type': 'chat_message',
-                  'response': json.dumps(response)
+            # return await self.channel_layer.group_send(
+            #   self.alert_room_name,
+            #   {
+            #       'type': 'chat_message',
+            #       'response': json.dumps(response)
 
-              }
-            )
+            #   }
+            # )
 
           response = {
             'response_type' : "bid",
@@ -167,7 +170,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
           }
 
         else:
+
           message = text_data_json['message']
+
+          await self.create_auction_message(user_id, message, goods_id)
 
           response = {
             'response_type' : "message",
@@ -210,9 +216,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_high_price(self, goods:object, user_id, money):
 
-        if goods.high_price > money or goods.status != True: # 방어코드
+        if goods.high_price >= money or goods.status != True: # 방어코드
           return False
 
+        Bid.objects.create(goods_id=goods.id, price=money, user_id=user_id)
+
+        layer = get_channel_layer()
+        data = {
+          'response_type' : 'alram',
+          'message' : '다른 핸더가 입찰했어요!',
+          'goods_id' : goods.id,
+          'goods_title' : goods.title,
+        }
+        if(goods.buyer_id != user_id):
+          # TODO buyer가 없을 경우에 예외 처리는 일단 안해봄
+          async_to_sync(layer.group_send)(f'alram_{goods.buyer_id}', {'type': 'chat_message', 'response': json.dumps(data)})
         goods.high_price = money
         goods.buyer_id = user_id
         goods.save()
@@ -258,6 +276,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
       else:
         participant.delete()
         return is_first, participants.count()
+
+    @database_sync_to_async
+    def create_auction_message(self, user_id, message, goods_id):
+      AuctionMessage.objects.create(author_id=user_id, content=message, goods_id = goods_id)
+      return None
 
 
 class ChatConsumerDirect(AsyncWebsocketConsumer):
@@ -455,7 +478,6 @@ class AlramConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-
         # Leave room group
         await self.channel_layer.group_discard(
             self.alram_name,

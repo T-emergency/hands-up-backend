@@ -5,7 +5,7 @@ from rest_framework import serializers
 from user.serializers import UserSerializer
 
 # models
-from .models import Goods, GoodsImage
+from .models import Bid, Goods, GoodsImage
 from rest_framework.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from datetime import datetime
@@ -143,3 +143,10 @@ class TradeInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goods
         fields = ['id', 'seller', 'buyer', 'image', 'wait_cnt', 'title', 'high_price', 'last_message']
+
+
+class BidSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    class Meta:
+        model = Bid
+        fields = '__all__'

@@ -36,3 +36,12 @@ class GoodsImage(models.Model):
 
     class Meta:
         db_table = "GoodsImage"
+
+
+class Bid(models.Model):
+    class Meta:
+        db_table = "Bid"
+
+    goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    price = models.IntegerField()

@@ -63,21 +63,21 @@ ASGI_APPLICATION = 'handsup.asgi.application'
 
 WSGI_APPLICATION = 'handsup.wsgi.application'
 
-if DP_MODE:
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                "hosts": [('redis', 6379)],
-            },
+host = 'redis' if DP_MODE else '127.0.0.1'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(host, 6379)],
         },
-    }
-else:
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        },
-    }
+    },
+}
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
+#     },
+# }
 
 
 MIDDLEWARE = [

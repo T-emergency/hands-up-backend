@@ -2,23 +2,26 @@ from django.db.models import Count, Sum, F, Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import permissions
+from chat.models import AuctionMessage
 
-from .models import GoodsImage, Goods
+from chat.serializers import AuctionMessageSerializer
+
+from .models import Bid, GoodsImage, Goods
 
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework import status, permissions
 
 
 from .models import Goods
 from user.models import User
-from .serializers import GoodsListSerializer, GoodsSerializer, GoodsImageSerializer
+from .serializers import BidSerializer, GoodsListSerializer, GoodsSerializer, GoodsImageSerializer
 
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, CursorPagination
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """
     비로그인 회원은 볼 수 만 있는 퍼미션, 수정과 삭제는 작성자만 가능
@@ -35,7 +38,12 @@ class GoodsPagination(PageNumberPagination):
     
     def get_paginated_response(self, data):
         return Response(data)
-
+class ChatPagination(PageNumberPagination):
+    page_size = 10
+    # ordering = '-created_at'
+    
+    def get_paginated_response(self, data):
+        return Response(data)
 
 
 class GoodsView(ModelViewSet):
@@ -63,6 +71,20 @@ class GoodsView(ModelViewSet):
             return [permissions.IsAuthenticated(),] # ()를 붙이는 이유는 super의 get_permissions를 보면 알 수 있다.
         return super(GoodsView, self).get_permissions()
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        bids = Bid.objects.filter(goods=self.get_object()).prefetch_related('user').order_by('-price')
+        data['bids'] = BidSerializer(bids, many=True).data
+        data['participants'] = [
+            {
+                'id' : p.user.id,
+                'user' : p.user.username
+            } 
+            for p in instance.auctionparticipant_set.prefetch_related('user').all()
+        ]
+        return Response(data)
 
     def get_serializer_context(self):
         return {
@@ -80,10 +102,22 @@ class GoodsView(ModelViewSet):
     def recommend_goods(self, request):
 
         q = Q(status = True) | Q(status = None)
-        recommend_goods = self.get_queryset().filter(q).annotate(participants_count = Count('auctionparticipant')).order_by('-participants_count')[:10]
+        recommend_goods = self.get_queryset().filter(q).annotate(
+                participants_count = Count('auctionparticipant')
+            ).order_by('-participants_count')[:10]
         serializer = GoodsListSerializer(recommend_goods, many = True, context = self.get_serializer_context())
 
         return Response(data = serializer.data, status=status.HTTP_200_OK)
+
+
+
+class GoodsChatView(ReadOnlyModelViewSet):
+    serializer_class = AuctionMessageSerializer
+    pagination_class = ChatPagination
+
+    def list(self, request, pk=None, *args, **kwargs):
+        self.queryset = AuctionMessage.objects.filter(goods_id=pk).prefetch_related('author').order_by('-created_at')
+        return super().list(request, *args, **kwargs)
 
 
 class UserGoodsView(ModelViewSet):

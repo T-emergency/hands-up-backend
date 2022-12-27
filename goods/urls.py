@@ -4,6 +4,7 @@ from goods import views
 urlpatterns = [
     path('', views.GoodsView.as_view({'get' : 'list', 'post' : 'create'}), name='goods_view'),
     path('<int:pk>/', views.GoodsView.as_view({'get' : 'retrieve'})),
+    path('<int:pk>/chat/', views.GoodsChatView.as_view({'get' : 'list'})),
 
     path('recommend/', views.GoodsView.as_view({'get' : 'recommend_goods'})),
     path('like/<int:goods_id>/', views.GoodsLike.as_view()),
