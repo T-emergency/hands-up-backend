@@ -36,5 +36,5 @@ class AuctionParticipant(models.Model):
     class Meta:
         db_table = 'AuctionParticipant'
 
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    goods = models.ForeignKey("goods.Goods", on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goods = models.ForeignKey("goods.Goods", on_delete=models.CASCADE)
