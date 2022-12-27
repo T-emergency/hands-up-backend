@@ -28,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_profile_image(self, obj):
         return obj.profile_image.url
+
     class Meta:
         model = User
         # fields = '__all__'#['username', 'password','profile_image']
@@ -39,6 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
+
         user  = super().create(validated_data) # 저장하고
         password = user.password
         user.set_password(password) # 지정하고
@@ -86,29 +88,6 @@ class JoinSerializer(serializers.ModelSerializer):
         return pw
 
 
-    # def validate_phone(self, number):
-    #     print(number)
-
-    #     REGEX_PHONE = '^01(?=.*[0-9]).{8,9}$'
-    #     if not re.search(REGEX_PHONE, number):
-    #         raise serializers.ValidationError(detail="'-' 없이 숫자 10자 혹은 11자를 입력해 주세요.")
-    #     if User.objects.filter(phone = number).exists():
-    #         raise serializers.ValidationError(detail="이미 존재하는 번호에요!")
-
-    #     return number
-
-
-    # def validate_username(self, username):
-
-    #     REGEX_USERNAME = '^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,10}$'
-
-    #     if not re.search(REGEX_USERNAME, username.strip()):
-    #         raise serializers.ValidationError(detail="2자리이상 10자리 이하")
-
-    #     if User.objects.filter(username = username).exists():
-    #         raise serializers.ValidationError(detail="이미 존재하는 아이디에요!")
-
-    #     return username
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

@@ -96,7 +96,6 @@ class GoodsView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
-        return Response("여기",status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['GET'])
     def recommend_goods(self, request):
@@ -122,16 +121,13 @@ class GoodsChatView(ReadOnlyModelViewSet):
 
 class UserGoodsView(ModelViewSet):
     serializer_class = GoodsSerializer
-    permission_classes = [IsAuthorOrReadOnly,]
+    # permission_classes = [IsAuthorOrReadOnly,]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
     filterset_fields = ["category"]
     search_fields = ['title','content']
     pagination_class = GoodsPagination
     lookup_field='user_id'
-    pagination_class = GoodsPagination
-
-
 
     def get_queryset(self):
         st = self.request.query_params.get('status', '')
@@ -173,28 +169,6 @@ class UserGoodsView(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(seller_id = self.request.user.id)
 
-    # serializer_class = GoodsSerializer
-    # permission_classes = [IsAuthorOrReadOnly,]
-    # lookup_field='user_id'
-
-    # def get_permissions(self):
-    #     if self.action == 'create':
-    #         return [permissions.IsAuthenticated(),]
-    #     return super(UserGoodsView, self).get_permissions()
-
-    # def get_serializer_context(self):
-    #     return {
-    #         'request': self.request,
-    #         'format': self.format_kwarg,
-    #         'view': self,
-    #         'action' : self.action
-    #     }
-
-    # def get_queryset(self):
-    #     return Goods.objects.prefetch_related('like','goodsimage_set').select_related('seller', 'buyer').filter(seller_id=self.kwargs['user_id'])
-
-    # def perform_create(self, serializer):
-    #     serializer.save(seller_id = self.request.user.id)
 
 
 class GoodsLike(APIView):
@@ -210,72 +184,3 @@ class GoodsLike(APIView):
             print('like')
             goods.like.add(user)
         return Response(status=status.HTTP_200_OK)
-# #############
-# class GoodsView(APIView):
-
-#     def get(self, request):
-#         goods = Goods.objects.all()
-#         serializer = GoodsSerializer(goods, many=True)
-#         return Response(serializer.data)
-
-#     def post(self, request):
-#         serializer = GoodsSerializer(data=request.data, context={'request':request})
-
-#         if serializer.is_valid():
-#             serializer.save(seller=request.user)
-
-#             return Response(serializer.data)
-#         else:
-#             return Response({'message': serializer.errors})
-#     def perform_create(self, serializer):
-#         serializer.save(seller_id = self.request.user.id)
-
-
-
-
-# from rest_framework import status
-# class GoodsView(APIView):
-
-#     def get(self, request):
-#         goods = Goods.objects.all()
-#         serializer = GoodsSerializer(goods, many=True)
-#         return Response(serializer.data)
-    
-#     def post(self, request):
-#         serializer = GoodsSerializer(data=request.data, context={'request':request})
-
-        
-#         if serializer.is_valid():
-#             serializer.save(seller=request.user)
-            
-#             return Response(serializer.data)
-#         else:
-#             return Response({'message': serializer.errors})
-        
-        
-# class GoodsDetailView(APIView):
-#     def get(self, request, goods_id):
-#         goods = get_object_or_404(Goods, pk=goods_id)
-#         serializer = GoodsSerializer(goods)
-#         return Response(serializer.data)
-    
-#     def put(self, request, goods_id):
-#         goods = get_object_or_404(Goods, pk=goods_id)
-#         if request.user == goods.seller:
-#             serializer = GoodsSerializer(goods, data=request.data, partial=True)
-#             if serializer.is_valid():
-#                 serializer.save(seller=request.user)
-#                 return Response(serializer.data)
-#             else:
-#                 return Response({'message':serializer.errors})
-    
-#     def delete(self, request, goods_id):
-#         goods = get_object_or_404(Goods, pk=goods_id)
-#         if request.user == goods.seller:
-#             goods.delete()
-#             return Response({"message": "삭제 완료"})
-#         else:
-#             return Response({"message":"권한이 없습니다"})
-
-
-

@@ -46,7 +46,7 @@ class GoodsSerializer(serializers.ModelSerializer):
             return obj.auctionparticipant_set.count()
         else:
             return 0
-    # TODO 확장자 validation
+            
     def validate(self, data):
         # 바이트 기준
         file_size= 5242880 # 5MB

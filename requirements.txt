@@ -46,7 +46,6 @@ six==1.16.0
 sqlparse==0.4.3
 threadpoolctl==3.1.0
 Twisted==22.10.0
-twisted-iocpsupport==1.0.2
 txaio==22.2.1
 typing_extensions==4.4.0
 tzdata==2022.7
