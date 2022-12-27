@@ -90,12 +90,20 @@
 
 ## ⭐️ 주요 기능
 
+### 경매 리스트
+![리스트 리드미](https://user-images.githubusercontent.com/112795528/209683860-9368486d-c787-4c17-bbc3-70d914996ae0.gif)
 
-### 거래할 물품 경매 이용
+### 경매 참여
+![경매리드미](https://user-images.githubusercontent.com/112795528/209683877-ddf2f1d3-5b4c-4982-90bf-a3f19d6040ac.gif)
+
+### 1대1 채팅
+![1대1채팅리드미](https://user-images.githubusercontent.com/112795528/209683906-d32bb91f-27ee-4415-87b4-78bf939ac8fa.gif)
 
 ### 평점 및 리뷰
+![리뷰 리드미](https://user-images.githubusercontent.com/112795528/209684552-80ae3017-6fe9-4d30-af94-6611192e53f8.gif)
 
 ### 자유 & 제보게시판
+![게시판 리드미](https://user-images.githubusercontent.com/112795528/209684913-3b928927-5c21-4b70-b0d1-71e10e04e437.gif)
 
 > 
 
