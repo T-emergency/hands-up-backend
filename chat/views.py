@@ -38,7 +38,7 @@ class ChatViewSet(ViewSet):
     특정 방의 요청이 'retrive' 오면 채팅방의 채팅들을 보내줍니다.
     """
     permission_classes = [IsTrader,]
-    # queryset = TradeMessage.objects.all().select_related('author', 'trade_room')
+    
     def get_permissions(self):
         if self.action == 'list':
             return [permissions.IsAuthenticated(),]

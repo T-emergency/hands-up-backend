@@ -26,7 +26,10 @@ environ.Env.read_env(
 )
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
+env = environ.Env(DEBUG=(bool, True))
+environ.Env.read_env(
+    env_file=os.path.join(BASE_DIR, '.env')
+)
 class UserManager(BaseUserManager):
     def create_user(self, phone, username, password=None):
         """

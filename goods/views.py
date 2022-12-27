@@ -108,7 +108,17 @@ class GoodsView(ModelViewSet):
 
         return Response(data = serializer.data, status=status.HTTP_200_OK)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            result = self.perform_destroy(instance)
+            if result == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+<<<<<<< HEAD
 
 class GoodsChatView(ReadOnlyModelViewSet):
     serializer_class = AuctionMessageSerializer
@@ -119,6 +129,16 @@ class GoodsChatView(ReadOnlyModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+=======
+    def perform_destroy(self, instance):
+        if (self.request.user == instance.seller) and instance.status == None:
+            instance.delete()
+            return True
+        return False
+    
+
+    
+>>>>>>> origin/pr/97
 class UserGoodsView(ModelViewSet):
     serializer_class = GoodsSerializer
     # permission_classes = [IsAuthorOrReadOnly,]
