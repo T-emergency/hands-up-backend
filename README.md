@@ -209,8 +209,9 @@
 
 ## 🎞 최종산출물
 
-<a href=" ">최종 발표 시연영상</a>
-
+<a href="https://youtu.be/y8WYp05jfD4">최종 발표 시연영상</a>
+<br>
+<a href="https://youtu.be/2ywxQqBGW7c">최종 발표 숏츠영</a>
 <br>
 <a href=" ">'Hands-up👋' 최종발표 pdf</a>
 
