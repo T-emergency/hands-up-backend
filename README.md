@@ -132,9 +132,9 @@
 <br>
 
 ### 와이어 프레임 [피그마](https://www.figma.com/file/k5S8VNoKajdBtdoggsQdXM/Untitled?node-id=0%3A1&t=QGv46Djbv9E2XcNU-0)
-- 사진
+- <img width="892" alt="와이어프레임" src="https://user-images.githubusercontent.com/113074274/209910735-74cb30cd-7fb8-4b52-9242-518c617bdc0f.png">
 ### ERD [erdcloud](https://www.erdcloud.com/d/HMtLigWgyPxSMAx55)
-- 사진
+- ![핸즈업 ERD](https://user-images.githubusercontent.com/113074274/209910675-8f31e43c-925b-42c8-ab0b-f12a5c07792d.png)
 ### API
 - [포스트맨 API 명세서](https://documenter.getpostman.com/view/24047799/2s8Z6vaaoD#2e63975f-b955-487a-9904-e93c3b0e8ef7)
 
